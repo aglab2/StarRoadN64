@@ -1447,9 +1447,6 @@ void geo_process_root(struct GraphNodeRoot *node, Vp *b, Vp *c, s32 clearColor) 
         viewport->vp.vtrans[3] = 0;
         vec3s_set(viewport->vp.vscale, node->width * 4, node->height * 4, maxz);
         viewport->vp.vscale[3] = 0;
-#ifdef F3DEX3
-        viewport->vp.vscale[1] = -viewport->vp.vscale[1];
-#endif
 
         if (b != NULL) {
             clear_framebuffer(clearColor);
@@ -1461,6 +1458,10 @@ void geo_process_root(struct GraphNodeRoot *node, Vp *b, Vp *c, s32 clearColor) 
             clear_framebuffer(clearColor);
             make_viewport_clip_rect(c);
         }
+
+#ifdef F3DEX3
+        viewport->vp.vscale[1] = -viewport->vp.vscale[1];
+#endif
 
         mtxf_identity(gMatStack[gMatStackIndex]);
         mtxf_to_mtx(initialMatrix, gMatStack[gMatStackIndex]);
