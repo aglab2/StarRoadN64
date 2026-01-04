@@ -247,6 +247,8 @@ typedef struct
 } __OSViContext; // 0x30 bytes
 
 extern __OSViContext *__osViNext __attribute__((section(".data")));
+extern u32 __osDisableInt();
+extern void __osRestoreInt();
 
 void set_vi_mode(int enabled)
 {
