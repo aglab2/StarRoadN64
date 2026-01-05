@@ -45,14 +45,6 @@ COMPILER ?= gcc
 $(eval $(call validate-option,COMPILER,gcc clang))
 
 
-# LIBGCCDIR - selects the libgcc configuration for checking for dividing by zero
-#   trap - GCC default behavior, uses teq instructions which some emulators don't like
-#   divbreak - this is similar to IDO behavior, and is default.
-#   nocheck - never checks for dividing by 0. Technically fastest, but also UB so not recommended
-LIBGCCDIR ?= divbreak
-$(eval $(call validate-option,LIBGCCDIR,trap divbreak nocheck))
-
-
 # SAVETYPE - selects the save type
 #   eep4k - uses EEPROM 4kbit
 #   eep16k - uses EEPROM 16kbit (There aren't any differences in syntax, but this is provided just in case)
@@ -137,54 +129,39 @@ endif
 #==============================================================================#
 
 # Default non-gcc opt flags
-DEFAULT_OPT_FLAGS = -Ofast
+DEFAULT_OPT_FLAGS = -Os -fallow-store-data-races -ffast-math -ftrapping-math -fno-associative-math -fno-tree-loop-distribute-patterns
 # Note: -fno-associative-math is used here to suppress warnings, ideally we would enable this as an optimization but
 # this conflicts with -ftrapping-math apparently.
 # TODO: Figure out how to allow -fassociative-math to be enabled
-SAFETY_OPT_FLAGS = -ftrapping-math -fno-associative-math
+SAFETY_OPT_FLAGS = -fno-tree-loop-distribute-patterns
 
 # Main opt flags
 GCC_MAIN_OPT_FLAGS = \
   $(DEFAULT_OPT_FLAGS) $(SAFETY_OPT_FLAGS) \
-  --param case-values-threshold=20 \
-  --param max-completely-peeled-insns=10 \
-  --param max-unrolled-insns=10 \
-  -finline-limit=1 \
-  -freorder-blocks-algorithm=simple  \
   -ffunction-sections \
   -fdata-sections \
-  -fno-loop-unroll-and-jam \
-  -fno-peel-loops \
-  -fno-split-loops \
-  -fno-split-paths \
-  -fno-tree-loop-distribution \
-  -fno-unswitch-loops \
-  -fno-ipa-cp-clone \
-  -fno-align-functions \
-  -fno-align-jumps \
-  -fno-align-labels \
-  -fno-align-loops \
-  -fno-prefetch-loop-arrays
+  -freciprocal-math \
+  -fdelete-null-pointer-checks \
+  -fgcse-after-reload \
+  -fpredictive-commoning \
+  -ftree-partial-pre \
+  -fno-semantic-interposition
 
 # Surface Collision
 GCC_COLLISION_OPT_FLAGS = \
-  $(DEFAULT_OPT_FLAGS) $(SAFETY_OPT_FLAGS) \
-  --param case-values-threshold=20 \
-  --param max-completely-peeled-insns=100 \
-  --param max-unrolled-insns=100 \
-  -finline-limit=0 \
-  -fno-inline \
-  -freorder-blocks-algorithm=simple  \
+  $(GCC_MAIN_OPT_FLAGS) -Os -ffast-math -ftrapping-math -fno-associative-math \
   -ffunction-sections \
   -fdata-sections \
   -falign-functions=32
 
+AUDIO_COLLISION_OPT_FLAGS = \
+  -Os -ffast-math -ftrapping-math -fno-associative-math $(GCC_MAIN_OPT_FLAGS) \
+  -ffunction-sections \
+  -fdata-sections
+
 # Math Util
 GCC_MATH_UTIL_OPT_FLAGS = \
-  $(DEFAULT_OPT_FLAGS) $(SAFETY_OPT_FLAGS) \
-  -fno-unroll-loops \
-  -fno-peel-loops \
-  --param case-values-threshold=20  \
+  $(GCC_MAIN_OPT_FLAGS) -Os -ffast-math -ftrapping-math -fno-associative-math \
   -ffunction-sections \
   -fdata-sections \
   -falign-functions=32
@@ -193,12 +170,7 @@ GCC_MATH_UTIL_OPT_FLAGS = \
 
 # Rendering graph node
 GCC_GRAPH_NODE_OPT_FLAGS = \
-  $(DEFAULT_OPT_FLAGS) $(SAFETY_OPT_FLAGS) \
-  --param case-values-threshold=20 \
-  --param max-completely-peeled-insns=100 \
-  --param max-unrolled-insns=100 \
-  -finline-limit=0 \
-  -freorder-blocks-algorithm=simple  \
+  $(GCC_MAIN_OPT_FLAGS) -Os -ffast-math -ftrapping-math -fno-associative-math \
   -ffunction-sections \
   -fdata-sections \
   -falign-functions=32
@@ -254,6 +226,7 @@ else ifeq ($(UNF),1)
   DEFINES += _FINALROM=1 NDEBUG=1 OVERWRITE_OSPRINT=1
 else
   ULTRALIB := ultra_rom
+#  ULTRALIB := gultra_rom_eabi3_oddreg3
   DEFINES += _FINALROM=1 NDEBUG=1 OVERWRITE_OSPRINT=0
 endif
 
@@ -470,7 +443,7 @@ else
   $(error Unable to detect a suitable MIPS toolchain installed)
 endif
 
-LIBRARIES := nustd hvqm2 z goddard
+LIBRARIES := goddard
 
 LINK_LIBRARIES = $(foreach i,$(LIBRARIES),-l$(i))
 
@@ -512,7 +485,6 @@ endif
 
 ifeq ($(TARGET_N64),1)
   TARGET_CFLAGS := -nostdinc -DTARGET_N64 -D_LANGUAGE_C -mfix4300
-  CC_CFLAGS := -fno-builtin
 endif
 
 INCLUDE_DIRS += include $(BUILD_DIR) $(BUILD_DIR)/include src . include/hvqm
@@ -522,22 +494,24 @@ endif
 
 C_DEFINES := $(foreach d,$(DEFINES),-D$(d))
 DEF_INC_CFLAGS := $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(C_DEFINES)
+ABI := -mabi=32 -mhard-float -mno-memcpy -fsingle-precision-constant
+# ABI := -mno-memcpy -mabi=eabi -mgp32 -mfp32 -Wdouble-promotion -fsingle-precision-constant -mhard-float -msingle-float -modd-spreg
 
 # C compiler options
-CFLAGS = $(OPT_FLAGS) $(TARGET_CFLAGS) $(MIPSISET) $(DEF_INC_CFLAGS)
+CFLAGS = $(OPT_FLAGS) $(TARGET_CFLAGS) $(MIPSISET) $(DEF_INC_CFLAGS) -gdwarf-4
 ifeq ($(COMPILER),gcc)
-  CFLAGS += -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
+  CFLAGS += -mno-shared -march=vr4300 -mfix4300 $(ABI) -fno-stack-protector -fno-common -mno-abicalls -fno-strict-aliasing -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
   CFLAGS += -Wno-missing-braces
 else ifeq ($(COMPILER),clang)
-  CFLAGS += -mfpxx -target mips -mabi=32 -mhard-float -fomit-frame-pointer -fno-stack-protector -fno-common -I include -I src/ -I $(BUILD_DIR)/include -fno-PIC -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
+  CFLAGS += -mfpxx -target mips $(ABI) -fomit-frame-pointer -fno-stack-protector -fno-common -I include -I src/ -I $(BUILD_DIR)/include -fno-PIC -mno-abicalls -fno-strict-aliasing -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
   CFLAGS += -Wno-missing-braces
 else
   CFLAGS += -non_shared -Wab,-r4300_mul -Xcpluscomm -Xfullwarn -signed -32
 endif
 CFLAGS += -Wno-overflow
-ASMFLAGS = -G 3 $(OPT_FLAGS) $(TARGET_CFLAGS) -mips3 $(DEF_INC_CFLAGS) -mno-shared -march=vr4300 -mfix4300 -mabi=32 -mhard-float -mdivide-breaks -fno-stack-protector -fno-common -mno-abicalls -fno-strict-aliasing -fno-inline-functions -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
+ASMFLAGS = -G 3 $(OPT_FLAGS) $(TARGET_CFLAGS) -mips3 $(DEF_INC_CFLAGS) -mno-shared -march=vr4300 -mfix4300 $(ABI) -fno-stack-protector -fno-common -mno-abicalls -fno-strict-aliasing -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
 
-ASFLAGS     := -march=vr4300 -mabi=32 $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(foreach d,$(DEFINES),--defsym $(d))
+ASFLAGS     := -march=vr4300 $(ABI) $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(foreach d,$(DEFINES),--defsym $(d))
 RSPASMFLAGS := $(foreach d,$(DEFINES),-definelabel $(subst =, ,$(d)))
 
 # C preprocessor flags
@@ -664,6 +638,7 @@ $(BUILD_DIR)/asm/ipl3.o:              $(IPL3_RAW_FILES)
 $(BUILD_DIR)/src/game/crash_screen.o: $(CRASH_TEXTURE_C_FILES)
 $(BUILD_DIR)/src/game/version.o:      $(BUILD_DIR)/src/game/version_data.h
 $(BUILD_DIR)/lib/aspMain.o:           $(BUILD_DIR)/rsp/audio.bin
+$(BUILD_DIR)/lib/rsp.o:               $(BUILD_DIR)/rsp/rspboot.bin
 $(SOUND_BIN_DIR)/sound_data.o:        $(SOUND_BIN_DIR)/sound_data.ctl $(SOUND_BIN_DIR)/sound_data.tbl $(SOUND_BIN_DIR)/sequences.bin $(SOUND_BIN_DIR)/bank_sets
 $(BUILD_DIR)/levels/scripts.o:        $(BUILD_DIR)/include/level_headers.h
 
@@ -683,8 +658,8 @@ $(BUILD_DIR)/src/usb/usb.o: CFLAGS += -Wno-unused-variable -Wno-sign-compare -Wn
 $(BUILD_DIR)/src/usb/debug.o: OPT_FLAGS := -O0
 $(BUILD_DIR)/src/usb/debug.o: CFLAGS += -Wno-unused-parameter -Wno-maybe-uninitialized
 # File specific opt flags
-$(BUILD_DIR)/src/audio/heap.o:          OPT_FLAGS := -Os -fno-jump-tables
-$(BUILD_DIR)/src/audio/synthesis.o:     OPT_FLAGS := -Os -fno-jump-tables
+$(BUILD_DIR)/src/audio/heap.o:          OPT_FLAGS := $(AUDIO_COLLISION_OPT_FLAGS)
+$(BUILD_DIR)/src/audio/synthesis.o:     OPT_FLAGS := $(AUDIO_COLLISION_OPT_FLAGS)
 
 $(BUILD_DIR)/src/engine/surface_collision.o:  OPT_FLAGS := $(COLLISION_OPT_FLAGS)
 $(BUILD_DIR)/src/engine/math_util.o:          OPT_FLAGS := $(MATH_UTIL_OPT_FLAGS)
@@ -914,7 +889,7 @@ $(BUILD_DIR)/sm64_prelim.ld: sm64.ld $(O_FILES) $(YAY0_OBJ_FILES) $(SEG_FILES) $
 
 $(BUILD_DIR)/sm64_prelim.elf: $(BUILD_DIR)/sm64_prelim.ld
 	@$(PRINT) "$(GREEN)Linking Preliminary ELF file:  $(BLUE)$@ $(NO_COL)\n"
-	$(V)$(LD) --gc-sections -L $(BUILD_DIR) -T $< -Map $(BUILD_DIR)/sm64_prelim.map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -L$(LIBS_DIR) -l$(ULTRALIB) -Llib $(LINK_LIBRARIES) -u sprintf -u osMapTLB -Llib/gcclib/$(LIBGCCDIR) -lgcc
+	$(V)$(LD) --gc-sections -L $(BUILD_DIR) -T $< -Map $(BUILD_DIR)/sm64_prelim.map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -L$(LIBS_DIR) -l$(ULTRALIB) -Llib $(LINK_LIBRARIES) -u sprintf -u osMapTLB
 
 $(BUILD_DIR)/goddard.txt: $(BUILD_DIR)/sm64_prelim.elf
 	$(call print,Getting Goddard size...)
@@ -928,7 +903,7 @@ $(BUILD_DIR)/asm/debug/map.o: asm/debug/map.s $(BUILD_DIR)/sm64_prelim.elf
 # Link SM64 ELF file
 $(ELF): $(BUILD_DIR)/sm64_prelim.elf $(BUILD_DIR)/asm/debug/map.o $(O_FILES) $(YAY0_OBJ_FILES) $(SEG_FILES) $(BUILD_DIR)/$(LD_SCRIPT) $(BUILD_DIR)/libz.a $(BUILD_DIR)/libgoddard.a
 	@$(PRINT) "$(GREEN)Linking ELF file:  $(BLUE)$@ $(NO_COL)\n"
-	$(V)$(LD) --gc-sections -L $(BUILD_DIR) -T $(BUILD_DIR)/$(LD_SCRIPT) -T goddard.txt -Map $(BUILD_DIR)/sm64.$(VERSION).map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -L$(LIBS_DIR) -l$(ULTRALIB) -Llib $(LINK_LIBRARIES) -u sprintf -u osMapTLB -Llib/gcclib/$(LIBGCCDIR) -lgcc
+	$(V)$(LD) --gc-sections -L $(BUILD_DIR) -T $(BUILD_DIR)/$(LD_SCRIPT) -T goddard.txt -Map $(BUILD_DIR)/sm64.$(VERSION).map --no-check-sections $(addprefix -R ,$(SEG_FILES)) -o $@ $(O_FILES) -L$(LIBS_DIR) -l$(ULTRALIB) -Llib $(LINK_LIBRARIES) -u sprintf -u osMapTLB
 
 # Build ROM
 ifeq (n,$(findstring n,$(firstword -$(MAKEFLAGS))))

@@ -95,6 +95,7 @@ void detect_emulator() {
         return;
     }
     
+#if 0
     /*
      * This check forces RZ bug on vc
      * If console is N64/adequate Emu, the current rounding mode, which is initialized to round-to-nearest (RN), is used
@@ -112,6 +113,7 @@ void detect_emulator() {
         return;
     }
     fcr_set_rounding_mode(roundingMode);
+#endif
 
     // Perform a read from unmapped PIF ram.
     // On console and well behaved emulators, this echos back the lower half of

@@ -8,6 +8,6 @@ double sin(double);
 float cosf(float);
 double cos(double);
 
-float sqrtf(float);
+#define sqrtf __builtin_sqrtf
 
 #endif

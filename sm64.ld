@@ -195,7 +195,7 @@ SECTIONS
       *libgcc.a:*.o(.text*);
       */libz.a:*.o(.text*);
       */libhvqm2.a:*.o(.text*);
-      lib/rspboot.o(.text*);
+      BUILD_DIR/lib/rsp.o(.text*);
 #include "rsptext.inc.ld"
       BUILD_DIR/lib/aspMain.o(.text*);
       lib/PR/audio/n_aspMain.o(.text*);
@@ -215,6 +215,7 @@ SECTIONS
       *ULTRALIB.a:*.o(.data*);
       */libhvqm2.a:*.o(.data*);
       */libz.a:*.o(.data*);
+      BUILD_DIR/lib/rsp.o(.text*);
 #include "rspdata.inc.ld"
       BUILD_DIR/lib/aspMain.o(.data*);
       lib/PR/audio/n_aspMain.o(.data*);
