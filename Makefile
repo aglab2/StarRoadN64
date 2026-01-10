@@ -512,7 +512,6 @@ CFLAGS += -Wno-overflow
 ASMFLAGS = -G 3 $(OPT_FLAGS) $(TARGET_CFLAGS) -mips3 $(DEF_INC_CFLAGS) -mno-shared -march=vr4300 -mfix4300 $(ABI) -fno-stack-protector -fno-common -mno-abicalls -fno-strict-aliasing -ffreestanding -fwrapv -Wall -Wextra -Wno-trigraphs
 
 ASFLAGS     := -march=vr4300 $(ABI) $(foreach i,$(INCLUDE_DIRS),-I$(i)) $(foreach d,$(DEFINES),--defsym $(d))
-RSPASMFLAGS := $(foreach d,$(DEFINES),-definelabel $(subst =, ,$(d)))
 
 # C preprocessor flags
 CPPFLAGS := -P -Wno-trigraphs $(DEF_INC_CFLAGS)
@@ -637,8 +636,6 @@ patch: $(ROM)
 $(BUILD_DIR)/asm/ipl3.o:              $(IPL3_RAW_FILES)
 $(BUILD_DIR)/src/game/crash_screen.o: $(CRASH_TEXTURE_C_FILES)
 $(BUILD_DIR)/src/game/version.o:      $(BUILD_DIR)/src/game/version_data.h
-$(BUILD_DIR)/lib/aspMain.o:           $(BUILD_DIR)/rsp/audio.bin
-$(BUILD_DIR)/lib/rsp.o:               $(BUILD_DIR)/rsp/rspboot.bin
 $(SOUND_BIN_DIR)/sound_data.o:        $(SOUND_BIN_DIR)/sound_data.ctl $(SOUND_BIN_DIR)/sound_data.tbl $(SOUND_BIN_DIR)/sequences.bin $(SOUND_BIN_DIR)/bank_sets
 $(BUILD_DIR)/levels/scripts.o:        $(BUILD_DIR)/include/level_headers.h
 
@@ -861,11 +858,6 @@ $(BUILD_DIR)/%.o: $(BUILD_DIR)/%.c
 $(BUILD_DIR)/%.o: %.s
 	$(call print,Assembling:,$<,$@)
 	$(V)$(CROSS)gcc -c $(ASMFLAGS) $(foreach i,$(INCLUDE_DIRS),-Wa,-I$(i)) -x assembler-with-cpp -MMD -MF $(BUILD_DIR)/$*.d  -o $@ $<
-
-# Assemble RSP assembly code
-$(BUILD_DIR)/rsp/%.bin $(BUILD_DIR)/rsp/%_data.bin: rsp/%.s
-	$(call print,Assembling:,$<,$@)
-	$(V)$(RSPASM) -sym $@.sym $(RSPASMFLAGS) -strequ CODE_FILE $(BUILD_DIR)/rsp/$*.bin -strequ DATA_FILE $(BUILD_DIR)/rsp/$*_data.bin $<
 
 # Run linker script through the C preprocessor
 $(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT) $(BUILD_DIR)/goddard.txt
