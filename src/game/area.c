@@ -272,10 +272,18 @@ static void osViSetXScaleRaw(u32 scale) {
 void set_vi_mode(int enabled)
 {
     register u32 saveMask = __osDisableInt();
+    if (3 == (enabled & 3))
+    {
+        osViSetXScaleRaw(0x201);
+    }
+    else
+    {
+        osViSetXScaleRaw(0x200);
+    }
+    
     if (enabled & 1)
     {
         __osViNext->control |= VI_CTRL_ANTIALIAS_MODE_1;
-        osViSetXScaleRaw(0x201);
     }
     else
     {
