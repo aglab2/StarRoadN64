@@ -8,3 +8,6 @@
 #include "levels/wf/areas/1/movtext.inc.c"
 
 #include "levels/wf/leveldata.inc.c"
+#include "levels/wf/custom_c/textureNew.inc.c"
+#include "levels/wf/custom_c/movtextNew.inc.c"
+#include "levels/wf/custom_c/custom.modelopt.inc.c"
