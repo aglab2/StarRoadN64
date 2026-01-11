@@ -6152,8 +6152,9 @@ const BehaviorScript bhvStarRoadChainChomp[] = {
 extern const Collision col_hmc_geo_000530_0xeacf27[];
 const BehaviorScript bhvStarRoadBOIRock[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags,1),
     LOAD_COLLISION_DATA(col_hmc_geo_000530_0xeacf27),
+    SET_FLOAT(oCollisionDistance,500),
+    OR_LONG(oFlags, (OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE | OBJ_FLAG_DONT_CALC_COLL_DIST)),
     CALL_NATIVE( bhv_init_room),
     BEGIN_LOOP(),
     CALL_NATIVE( bhv_breakable_box_loop),
@@ -6164,9 +6165,9 @@ const BehaviorScript bhvStarRoadBOIRock[] = {
 extern const Collision col_hmc_geo_000570_0xeb0f6f[];
 const BehaviorScript bhvStarRoadBOIPlatform[] = {
     BEGIN(OBJ_LIST_SURFACE),
-    OR_INT(oFlags,17),
     LOAD_COLLISION_DATA(col_hmc_geo_000570_0xeb0f6f),
     CALL_NATIVE( bhv_ssl_moving_pyramid_wall_init),
+    OR_LONG(oFlags, (OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE | OBJ_FLAG_SET_FACE_ANGLE_TO_MOVE_ANGLE | OBJ_FLAG_DONT_CALC_COLL_DIST)),
     BEGIN_LOOP(),
         CALL_NATIVE( bhv_ssl_moving_pyramid_wall_loop),
         CALL_NATIVE( load_object_collision_model),

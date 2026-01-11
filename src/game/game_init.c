@@ -830,6 +830,7 @@ void thread5_game_loop(UNUSED void *arg) {
             Hacktice_onFrame();
         }
 
+#define TEST_VI_MODES 1
 #if TEST_VI_MODES
         static int mode = 0;
         if (gPlayer1Controller->buttonPressed & L_TRIG)
