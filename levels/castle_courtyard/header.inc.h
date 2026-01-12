@@ -1,11 +1,7 @@
-// geo
-extern const GeoLayout castle_courtyard_geo_000200[];
-extern const GeoLayout castle_courtyard_geo_000218[];
-
-// leveldata
-extern const Gfx castle_courtyard_seg7_dl_070048B8[];
-extern const Gfx castle_courtyard_seg7_dl_07005078[];
-extern const Gfx castle_courtyard_seg7_dl_07005698[];
-extern const Gfx castle_courtyard_seg7_dl_07005938[];
-extern const Collision castle_courtyard_seg7_collision[];
-extern const MacroObject castle_courtyard_seg7_macro_objs[];
+extern const GeoLayout castle_courtyard_area_1_geo[];
+extern const GeoLayout castle_courtyard_area_1[];
+extern const Collision castle_courtyard_area_1_collision[];
+extern const MacroObject castle_courtyard_area_1_macro_objs[];
+extern u8 castle_courtyard_dl_jrb_textures_04800_rgba16_rgba16[];
+extern Vtx castle_courtyard_dl_Plane_mesh_layer_1_vtx_0[4];
+extern Gfx castle_courtyard_dl_Plane_mesh_layer_1[];

@@ -14,3 +14,5 @@
 #include "levels/castle_courtyard/header.h"
 
 #include "levels/castle_courtyard/geo.inc.c"
+#include "levels/castle_courtyard/custom_c/custom.modelopt_np.inc.h"
+#include "levels/castle_courtyard/custom_c/custom.geo.inc.c"

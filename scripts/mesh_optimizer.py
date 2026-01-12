@@ -873,7 +873,7 @@ class ModelMeshEntry(TriKit):
         triangles, snakes = TriKit.stripify(triangles)
         return RenderPass(vertices, [ list(tri) for tri in triangles ], snakes)
 
-    def compile(self, have_tile):
+    def compile(self, have_tile, vtx_filter):
         assert self._base_vertices_model_entry, "compile() called twice"
         assert not self._base_vertices_model_entry.used
         self._base_vertices_model_entry.used = True
@@ -881,169 +881,13 @@ class ModelMeshEntry(TriKit):
         vtx_entry = self._base_vertices_model_entry
 
         vtx_values = [ Vtx(vtx) for vtx in self._vertices ]
+
         triangles_altered = False
-        try: # "cck_dl_0040_object_013EC7E4_mesh_layer_1_tri_3" in vtx_entry.name:
-            raise Exception("")
-            # Step 0: Merge coplanar vertices
-            triangles = self._triangles[:]
-            log_debug(f"start triangles: {triangles}")
-            bary_precals = { tri: BaryPreCalc([ vtx_values[vtx] for vtx in tri ]) for tri in triangles }
-
-            def add_tri(tri):
-                log_debug(f"Adding triangle: {tri}")
-                assert not TriKit._tri_trivial(tri)
-                tri = TriKit._tri_normalize(tri)
-                triangles.append(tri)
-
-            def check_barylink(tri, ntri):
-                nvtx = TriKit._v_in_triA_not_in_triB(ntri, tri)
-                if nvtx == -1:
-                    return False
-
-                bary_precalc = bary_precals[tri]
-                nvtx_v = vtx_values[nvtx]
-                bary_coords = bary_precalc.try_conv(nvtx_v.pos)
-                if not bary_coords:
-                    return False
-
-                nbary_precalc = bary_precals[ntri]
-                mul = nbary_precalc.tv * bary_precalc.tv
-                if mul < 0:
-                    # Normals are facing opposite directions - do not merge
-                    return False
-
-                bary_total = sum(bary_coords)
-                tri_weighted = list(zip(bary_coords, bary_precalc.tri))
-                u_expected = sum([ w * t.uv[0]    for w, t in tri_weighted ])
-                v_expected = sum([ w * t.uv[1]    for w, t in tri_weighted ])
-                r_expected = sum([ w * t.color[0] for w, t in tri_weighted ])
-                g_expected = sum([ w * t.color[1] for w, t in tri_weighted ])
-                b_expected = sum([ w * t.color[2] for w, t in tri_weighted ])
-                a_expected = sum([ w * t.color[3] for w, t in tri_weighted ])
-
-                #u_weighted = u_expected / bary_total
-                #v_weighted = v_expected / bary_total
-                #r_weighted = r_expected / bary_total
-                #g_weighted = g_expected / bary_total
-                #b_weighted = b_expected / bary_total
-                #a_weighted = a_expected / bary_total
-
-                u_actual = nvtx_v.uv[0] * bary_total
-                v_actual = nvtx_v.uv[1] * bary_total
-                r_actual = nvtx_v.color[0] * bary_total
-                g_actual = nvtx_v.color[1] * bary_total
-                b_actual = nvtx_v.color[2] * bary_total
-                a_actual = nvtx_v.color[3] * bary_total
-
-                color_err = bary_total * 3
-                uv_err    = bary_total * 10
-                
-                u_ok = abs(u_expected - u_actual) < uv_err
-                v_ok = abs(v_expected - v_actual) < uv_err
-                r_ok = abs(r_expected - r_actual) < color_err
-                g_ok = abs(g_expected - g_actual) < color_err
-                b_ok = abs(b_expected - b_actual) < color_err
-                a_ok = abs(a_expected - a_actual) < color_err
-
-                return u_ok and v_ok and r_ok and g_ok and b_ok and a_ok
-
-            strip_tri_to_tris = TriKit.build_strip_tri_to_tris(self._triangles, check_barylink)
-            strip_link_checks = []
-            for tri in strip_tri_to_tris:
-                for ntri in strip_tri_to_tris[tri]:
-                    strip_link_checks.append((ntri, tri))
-
-            log_debug(f"strip_link_checks: {strip_link_checks} adding to {strip_tri_to_tris}")
-            for link in strip_link_checks:
-                tri, ntri = link
-                if tri not in strip_tri_to_tris:
-                    strip_tri_to_tris[tri] = set()
-                strip_tri_to_tris[tri].add(ntri)
-            del strip_link_checks
-            
-            log_debug(f"start strip_tri_to_tris: {strip_tri_to_tris}")
-
-            tri_traverse_order = TriKit.build_traverse_order(strip_tri_to_tris)
-            if tri_traverse_order:
-                for tri in tri_traverse_order:
-                    # Check if it was already rendered as part of a strip
-                    if tri not in strip_tri_to_tris:
-                        continue
-
-                    log_debug(f"strip_tri_to_tris: {strip_tri_to_tris}, triangle: {triangles}")
-
-                    ngon_tris = set()
-                    ngon_tris.add(tri)
-
-                    # Instead of DFS, use BFS for improved quality for generated ngon
-                    stack = deque() 
-                    stack.appendleft(tri)
-                    while stack:
-                        curr = stack.pop()
-                        if not curr in strip_tri_to_tris:
-                            continue
-                        for ntri in strip_tri_to_tris[curr]:
-                            if ntri in ngon_tris:
-                                continue
-
-                            ngon_tris.add(ntri)
-                            stack.appendleft(ntri)
-
-                    # Mark tris as used
-                    for tri in ngon_tris:
-                        log_debug(f"Removing triangle {tri} from strip_tri_to_tris")
-                        log_debug(f"strip_tri_to_tris before {strip_tri_to_tris}")
-                        if not tri in strip_tri_to_tris:
-                            continue
-                        for ntri in strip_tri_to_tris.pop(tri):
-                            strip_tri_to_tris[ntri].remove(tri)
-                            if not strip_tri_to_tris[ntri]:
-                                del strip_tri_to_tris[ntri]
-
-                        log_debug(f"strip_tri_to_tris after {strip_tri_to_tris}")
-
-                    log_debug(f"strip_tri_to_tris after: {strip_tri_to_tris}, triangle: {triangles}")
-
-                    # Try to reduce amount of vertices in ngon
-                    if len(ngon_tris) <= 4:
-                        continue
-
-                    for ngon_any_tri in ngon_tris:
-                        break
-                    ngon_any_tri_vtxs = [ vtx_values[vtx] for vtx in ngon_any_tri ]
-                    ngon_normal = (ngon_any_tri_vtxs[0].pos - ngon_any_tri_vtxs[1].pos) ^ (ngon_any_tri_vtxs[0].pos - ngon_any_tri_vtxs[2].pos)
-                    
-                    shad = ShapelyAdapter(ngon_normal)
-                    ngon_tris_vtx_pos = [[shad.vtx_to_2d(vtx_values[vtx].pos, vtx) for vtx in tri] for tri in ngon_tris]
-                    shapely_tris = [ shapely.Polygon(tri) for tri in ngon_tris_vtx_pos ]
-                    for shapely_tri in shapely_tris:
-                        shapely.set_precision(shapely_tri, 1)
-
-                    shapely_poly = shapely.unary_union(shapely_tris)
-                    shapely_simple_poly = shapely_poly.simplify(3, preserve_topology=True)
-                    shapely_triangulation = shapely.constrained_delaunay_triangles(shapely_simple_poly)
-                    if len(shapely_triangulation.geoms) >= len(ngon_tris):
-                        continue
-
-                    triangulation = [ ( shad.vtx_from_2d(pt) for pt in tri.exterior.coords[:-1] ) for tri in shapely_triangulation.geoms ]
-                    log_debug(f"reduced ngon: {ngon_tris} with ngon_values: {triangulation}")
-
-                    # Get rid of all triangles that are were part of the ngon...
-                    triangles_altered = True
-                    for tri in ngon_tris:
-                        del triangles[triangles.index(tri)]
-
-                    for tri in triangulation:
-                        ttri = tuple(tri)
-                        vtri = [ vtx_values[vtx] for vtx in ttri ]
-                        normal_vtri = (vtri[0].pos - vtri[1].pos) ^ (vtri[0].pos - vtri[2].pos)
-                        if normal_vtri * ngon_normal < 0:
-                            ttri = (ttri[0], ttri[2], ttri[1])
-
-                        add_tri(ttri)
-        except Exception as e:
-            triangles_altered = False
-            pass
+        if vtx_filter:
+            vtx_skipped = [ vtx_filter(vtx) for vtx in vtx_values ]
+            old_tri_len = len(self._triangles)
+            triangles = [ tri for tri in self._triangles if any(not vtx_skipped[vtx] for vtx in tri) ]
+            triangles_altered = old_tri_len != len(triangles)
 
         if triangles_altered:
             vertices_replaced = self._vertices
@@ -1404,7 +1248,7 @@ def _is_draw(line, nline):
 
     return False
 
-def optimize_model(model):
+def optimize_model(model, vtx_filter=None):
     for model_entry_idx in range(len(model.entries)):
         old_entry = model.entries[model_entry_idx]
         if not isinstance(old_entry, ModelRawEntry):
@@ -1427,7 +1271,7 @@ def optimize_model(model):
             nline = old_entry.data[i+1] if i + 1 < len(old_entry.data) else None
             if not _is_draw(line, nline):
                 if entry:
-                    draws, vtxopt = entry.compile(have_tile)
+                    draws, vtxopt = entry.compile(have_tile, vtx_filter)
                     have_tile = False
                     mlist.data.extend(draws)
                     mlist.opvtxs.append(vtxopt)
@@ -1589,7 +1433,7 @@ if '__main__' in __name__:
         header_patched_path = make_opt_name(header_path)
 
         model = load_model(model_path)
-        optimize_model(model)
+        optimize_model(model, lambda vtx: vtx.pos.y < 0)
         serialize_model(model, model_patched_path)
         patch_header(header_path, header_patched_path)
     else:

@@ -61,3 +61,37 @@ void bhv_star_road_yoshi_init()
 
     return;
 }
+
+Gfx *geo_star_road_p(s32 callContext, struct GraphNode *node, UNUSED Mat4 mtx)
+{
+    if (callContext == GEO_CONTEXT_RENDER) {
+        struct GraphNodeGenerated *genNode = (struct GraphNodeGenerated *) node;
+        struct GraphNodeDisplayList *graphNode = (struct GraphNodeDisplayList *) node->next;
+
+        int active = gMarioStates->pos[1] < 0;
+        if (active) {
+            graphNode->node.flags |= GRAPH_RENDER_ACTIVE;
+        } else {
+            graphNode->node.flags &= ~GRAPH_RENDER_ACTIVE;
+        }
+    }
+
+    return NULL;
+}
+
+Gfx *geo_star_road_n(s32 callContext, struct GraphNode *node, UNUSED Mat4 mtx)
+{
+    if (callContext == GEO_CONTEXT_RENDER) {
+        struct GraphNodeGenerated *genNode = (struct GraphNodeGenerated *) node;
+        struct GraphNodeDisplayList *graphNode = (struct GraphNodeDisplayList *) node->next;
+
+        int active = gMarioStates->pos[1] > 0;
+        if (active) {
+            graphNode->node.flags |= GRAPH_RENDER_ACTIVE;
+        } else {
+            graphNode->node.flags &= ~GRAPH_RENDER_ACTIVE;
+        }
+    }
+
+    return NULL;
+}
