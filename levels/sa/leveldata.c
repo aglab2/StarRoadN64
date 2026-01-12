@@ -6,3 +6,8 @@
 
 #include "make_const_nonconst.h"
 #include "levels/sa/leveldata.inc.c"
+
+#include "levels/sa/custom_c/textureNew.inc.c"
+#include "levels/sa/custom_c/movtextNew.inc.c"
+#include "levels/sa/custom_c/custom.modelopt.inc.c"
+

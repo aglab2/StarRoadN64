@@ -1889,7 +1889,7 @@ void pss_end_slide(struct MarioState *m) {
     //! This flag isn't set on death or level entry, allowing double star spawn
     if (sPssSlideStarted) {
         u16 slideTime = level_control_timer(TIMER_CONTROL_STOP);
-        if (slideTime < 630) {
+        if (slideTime < 18*30) {
             m->marioObj->oBehParams = (1 << 24);
             spawn_default_star(5668.0f, -5772.0f, -5226.0f);
         }

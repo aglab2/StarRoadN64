@@ -1433,7 +1433,7 @@ if '__main__' in __name__:
         header_patched_path = make_opt_name(header_path)
 
         model = load_model(model_path)
-        optimize_model(model, lambda vtx: vtx.pos.y < 0)
+        optimize_model(model, None)
         serialize_model(model, model_patched_path)
         patch_header(header_path, header_patched_path)
     else:
