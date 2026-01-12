@@ -14,3 +14,5 @@
 #include "levels/bitdw/header.h"
 
 #include "levels/bitdw/geo.inc.c"
+#include "levels/bitdw/custom_c/custom.modelopt.inc.h"
+#include "levels/bitdw/custom_c/custom.geo.inc.c"

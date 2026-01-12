@@ -21,7 +21,13 @@ enum SkyBackgroundParams {
     BACKGROUND_HAUNTED,
     BACKGROUND_GREEN_SKY,
     BACKGROUND_ABOVE_CLOUDS,
-    BACKGROUND_PURPLE_SKY
+    BACKGROUND_PURPLE_SKY,
+};
+
+enum {
+#define MIO0_SEG(name, addr) name##_Index,
+#include "textures/skyboxes/Skybox_Rules.ld"
+#undef MIO0_SEG
 };
 
 enum GeoLayoutCommands {

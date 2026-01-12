@@ -125,8 +125,6 @@ actors/bowser_flame/bowser_flame_6.rgba16.png
 actors/bowser_flame/bowser_flame_7.rgba16.png
 actors/bowser_flame/bowser_flame_8.rgba16.png
 actors/bowser_flame/bowser_flame_9.rgba16.png
-actors/breakable_box/cork_box_surface.rgba16.png
-actors/breakable_box/crazy_box_surface.rgba16.png
 actors/bub/bub_eye_border.rgba16.png
 actors/bub/bub_eyes.rgba16.png
 actors/bub/bub_fins.rgba16.png
@@ -183,14 +181,8 @@ actors/door/bbh_door_overlay.rgba16.png
 actors/door/door_lock.rgba16.png
 actors/door/hmc_mural_door.rgba16.png
 actors/door/hmc_mural_door_overlay.rgba16.png
-actors/door/metal_door.rgba16.png
-actors/door/metal_door_overlay.rgba16.png
-actors/door/one_star_door_sign.rgba16.png
-actors/door/polished_wooden_door.rgba16.png
-actors/door/polished_wooden_door_overlay.rgba16.png
 actors/door/rough_wooden_door.rgba16.png
 actors/door/rough_wooden_door_overlay.rgba16.png
-actors/door/three_star_door_sign.rgba16.png
 actors/door/zero_star_door_sign.rgba16.png
 actors/dorrie/dorrie_eye.rgba16.png
 actors/dorrie/dorrie_skin.rgba16.png
@@ -450,8 +442,6 @@ actors/treasure_chest/treasure_chest_lock.rgba16.png
 actors/treasure_chest/treasure_chest_lock_top.rgba16.png
 actors/treasure_chest/treasure_chest_side.rgba16.png
 actors/tree/palm_tree.rgba16.png
-actors/tree/pine_tree.rgba16.png
-actors/tree/snowy_pine_tree.rgba16.png
 actors/tree/tree_left_side.rgba16.png
 actors/tree/tree_right_side.rgba16.png
 actors/ukiki/ukiki_butt.rgba16.png
@@ -1357,8 +1347,6 @@ textures/fire/lll_textures.00000.rgba16.png
 textures/fire/lll_textures.00800.rgba16.png
 textures/fire/lll_textures.01000.rgba16.png
 textures/fire/lll_textures.01800.rgba16.png
-textures/fire/lll_textures.02000.rgba16.png
-textures/fire/lll_textures.02800.rgba16.png
 textures/fire/lll_textures.03000.rgba16.png
 textures/fire/lll_textures.03800.rgba16.png
 textures/fire/lll_textures.04000.rgba16.png
@@ -1374,7 +1362,6 @@ textures/fire/lll_textures.08800.rgba16.png
 textures/fire/lll_textures.09000.rgba16.png
 textures/fire/lll_textures.09800.rgba16.png
 textures/fire/lll_textures.0A000.rgba16.png
-textures/fire/lll_textures.0A800.rgba16.png
 textures/fire/lll_textures.0B000.rgba16.png
 textures/fire/lll_textures.0B800.rgba16.png
 textures/generic/bob_textures.00000.rgba16.png

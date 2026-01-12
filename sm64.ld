@@ -590,6 +590,21 @@ SECTIONS
    YAY0_SEG(bidw_skybox,        0x0A000000)
    YAY0_SEG(bits_skybox,        0x0A000000)
 
+   YAY0_SEG(SkyboxCustom21462720_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom22380224_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom23297728_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom26050240_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom28802752_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom29720256_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom31555264_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom33390272_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom35225280_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom37060288_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom38895296_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom39812800_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom43482816_skybox, 0x0A000000)
+   YAY0_SEG(SkyboxCustom46235328_skybox, 0x0A000000)
+
    // Texture bins
    YAY0_SEG(fire,     0x09000000)
    YAY0_SEG(spooky,   0x09000000)

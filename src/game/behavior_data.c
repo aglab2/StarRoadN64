@@ -6307,3 +6307,17 @@ const BehaviorScript bhvStarRoadVCCog[] = {
     CALL_NATIVE( load_object_collision_model),
     END_LOOP(),
 };
+
+extern const Collision col_lll_geo_000DD0_0xa9458c[];
+const BehaviorScript bhvStarRoadStarB1Box[] = {
+    BEGIN(OBJ_LIST_SURFACE),
+    OR_INT(oFlags,1),
+    LOAD_COLLISION_DATA(col_lll_geo_000DD0_0xa9458c),
+    SET_FLOAT(oCollisionDistance,500),
+    CALL_NATIVE( bhv_init_room),
+    CALL_NATIVE( bhv_boo_with_cage_init),
+    BEGIN_LOOP(),
+    CALL_NATIVE( bhv_breakable_box_loop),
+    CALL_NATIVE( load_object_collision_model),
+    END_LOOP(),
+};
