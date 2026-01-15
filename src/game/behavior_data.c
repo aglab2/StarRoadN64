@@ -6469,3 +6469,54 @@ const BehaviorScript bhvStarRoadLLFLillypad[] = {
     LOAD_COLLISION_DATA(col_ttm_geo_000990_0x11827cb),
     GOTO( Bhv_Custom_0x13003b70),
 };
+
+extern const Collision col_ddd_geo_0004A0_0x1095763[];
+const BehaviorScript bhvStarRoadMMMTambourine[] = {
+    BEGIN(OBJ_LIST_SURFACE),
+    OR_INT(oFlags,1),
+    LOAD_COLLISION_DATA(col_ddd_geo_0004A0_0x1095763),
+    BEGIN(OBJ_LIST_PLAYER),
+    BEGIN_LOOP(),
+    CALL_NATIVE( bhv_ttc_spinner_update),
+    CALL_NATIVE( load_object_collision_model),
+    END_LOOP(),
+};
+
+extern const Collision col_ddd_geo_000478_0x10890b3[];
+const BehaviorScript bhvStarRoadMMMDrumstick[] = {
+    BEGIN(OBJ_LIST_SURFACE),
+    OR_INT(oFlags,17),
+    LOAD_COLLISION_DATA(col_ddd_geo_000478_0x10890b3),
+    CALL_NATIVE( bhv_ssl_moving_pyramid_wall_init),
+    BEGIN_LOOP(),
+    CALL_NATIVE( bhv_ssl_moving_pyramid_wall_loop),
+    CALL_NATIVE( load_object_collision_model),
+    END_LOOP(),
+};
+
+const BehaviorScript bhvStarRoadBee[] = {
+    BEGIN(OBJ_LIST_GENACTOR),
+    OR_INT(oFlags,8257),
+    BILLBOARD(),
+    SET_HOME(),
+    CALL_NATIVE( bhv_init_room),
+    SCALE(0,150),
+    BEGIN_LOOP(),
+        CALL_NATIVE( bhv_fly_guy_update),
+        CALL_NATIVE( bhv_fly_guy_update),
+        ADD_INT(oAnimState,1),
+    END_LOOP(),
+};
+
+const BehaviorScript bhvStarRoadMMMCannon[] = {
+    BEGIN(OBJ_LIST_LEVEL),
+    OR_INT(oFlags,201),
+    SET_INT(oInteractType,16384),
+    ADD_FLOAT(oPosY,65196),
+    SET_HOME(),
+    SET_HITBOX(150,166),
+    SET_INT(oIntangibleTimer,0),
+    BEGIN_LOOP(),
+    CALL_NATIVE( bhv_cannon_base_loop),
+    END_LOOP(),
+};
