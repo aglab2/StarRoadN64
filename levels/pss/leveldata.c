@@ -6,3 +6,7 @@
 
 #include "make_const_nonconst.h"
 #include "levels/pss/leveldata.inc.c"
+
+#include "levels/pss/custom_c/textureNew.inc.c"
+#include "levels/pss/custom_c/movtextNew.inc.c"
+#include "levels/pss/custom_c/custom.modelopt.inc.c"

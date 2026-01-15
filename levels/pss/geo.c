@@ -14,3 +14,5 @@
 #include "levels/pss/header.h"
 
 #include "levels/pss/geo.inc.c"
+#include "levels/pss/custom_c/custom.modelopt.inc.h"
+#include "levels/pss/custom_c/custom.geo.inc.c"
