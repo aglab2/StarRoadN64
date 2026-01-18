@@ -11,3 +11,7 @@
 #include "levels/castle_inside/areas/3/movtext.inc.c"
 
 #include "levels/castle_inside/leveldata.inc.c"
+#include "levels/castle_inside/custom_c/textureNew.inc.c"
+#include "levels/castle_inside/custom_c/movtextNew.inc.c"
+#include "levels/castle_inside/custom_c/custom.modelopt.inc.c"
+

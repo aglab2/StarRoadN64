@@ -177,8 +177,8 @@ const LevelScript level_castle_courtyard_entry[] = {
 		OBJECT_WITH_ACTS(129,3353,-3385,-3160,0,0,0,0x10000, bhvBreakableBox,31),
 		OBJECT_WITH_ACTS(116,3220,-2802,-401,0,0,0,0x0, bhvOneCoin,31),
 		OBJECT_WITH_ACTS(116,3390,-3003,204,0,0,0,0x0, bhvOneCoin,31),
-		OBJECT_WITH_ACTS(0,1171,1662,-1242,0,180,0,0x0, bhvWfSlidingPlatform,31),
-		OBJECT_WITH_ACTS(0,2887,-3233,-2131,0,270,0,0x0, bhvWfSlidingPlatform,31),
+		//OBJECT_WITH_ACTS(0,1171,1662,-1242,0,180,0,0x0, bhvWfSlidingPlatform,31),
+		//OBJECT_WITH_ACTS(0,2887,-3233,-2131,0,270,0,0x0, bhvWfSlidingPlatform,31),
 
 		WARP_NODE(0,0,0,0,0),
 		WARP_NODE(39,36,1,10,0),
