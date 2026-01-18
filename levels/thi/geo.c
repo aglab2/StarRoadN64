@@ -14,3 +14,6 @@
 #include "levels/thi/header.h"
 
 #include "levels/thi/geo.inc.c"
+#include "levels/thi/custom_c/custom.modelopt.inc.h"
+#include "levels/thi/custom_c/custom.geo.inc.c"
+#include "levels/thi/custom_c/obj.geo.inc.c"

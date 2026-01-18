@@ -6636,3 +6636,81 @@ const BehaviorScript bhvStarRoadWCBlade[] = {
         CALL_NATIVE( load_object_collision_model),
     END_LOOP(),
 };
+
+extern const Collision col_geo_bbh_0005F8_0xdd10c5[];
+const BehaviorScript bhvStarRoadFFFInvPyramid[] = {
+    BEGIN(OBJ_LIST_SURFACE),
+    OR_INT(oFlags,73),
+    LOAD_COLLISION_DATA(col_geo_bbh_0005F8_0xdd10c5),
+    ADD_FLOAT(oPosY,5),
+    SET_HOME(),
+    CALL_NATIVE( bhv_platform_normals_init),
+    BEGIN_LOOP(),
+        CALL_NATIVE( bhv_tilting_inverted_pyramid_loop),
+        CALL_NATIVE( load_object_collision_model),
+    END_LOOP(),
+};
+
+extern const Collision col_geo_bbh_0005C8_0xdd0c1d[];
+const BehaviorScript bhvStarRoadFFFWallPlatform[] = {
+    BEGIN(OBJ_LIST_SURFACE),
+    OR_INT(oFlags,1),
+    LOAD_COLLISION_DATA(col_geo_bbh_0005C8_0xdd0c1d),
+    SET_INT_RAND_RSHIFT(oYoshiTargetYaw,1,32),
+    SET_HOME(),
+    BEGIN_LOOP(),
+    CALL_NATIVE( bhv_arrow_lift_loop),
+    CALL_NATIVE( load_object_collision_model),
+    END_LOOP(),
+};
+
+static const BehaviorScript Bhv_Custom_0x13004864[] = {
+    CALL_NATIVE( bhv_ssl_moving_pyramid_wall_init),
+    BEGIN_LOOP(),
+    CALL_NATIVE( bhv_ssl_moving_pyramid_wall_loop),
+    CALL_NATIVE( load_object_collision_model),
+    END_LOOP(),
+};
+
+extern const Collision col_geo_bbh_0005B0_0xdd07f5[];
+const BehaviorScript bhvStarRoadFFFLava[] = {
+    BEGIN(OBJ_LIST_SURFACE),
+    OR_INT(oFlags,17),
+    LOAD_COLLISION_DATA(col_geo_bbh_0005B0_0xdd07f5),
+    GOTO( Bhv_Custom_0x13004864),
+};
+
+extern const Collision col_geo_bbh_000628_0xdd160d[];
+const BehaviorScript bhvStarRoadFFFPillar[] = {
+    BEGIN(OBJ_LIST_SURFACE),
+    OR_INT(oFlags,17),
+    LOAD_COLLISION_DATA(col_geo_bbh_000628_0xdd160d),
+    GOTO( Bhv_Custom_0x13004864),
+};
+
+const BehaviorScript bhvStarRoadFFFAutoscroller[] = {
+    BEGIN(OBJ_LIST_SURFACE),
+    OR_INT(oFlags,8257),
+    CALL_NATIVE( bhv_init_room),
+    CALL_NATIVE( bhv_platform_on_track_init),
+    LOAD_COLLISION_DATA(checkerboard_platform_seg8_collision_platform),
+    BEGIN_LOOP(),
+        CALL_NATIVE( bhv_platform_on_track_update),
+        CALL_NATIVE( load_object_collision_model),
+    END_LOOP(),
+};
+
+extern const Collision col_geo_bbh_000640_0xa71f04[];
+const BehaviorScript bhvStarRoadFFFSink[] = {
+    BEGIN(OBJ_LIST_SURFACE),
+    OR_INT(oFlags,73),
+    LOAD_COLLISION_DATA(col_geo_bbh_000640_0xa71f04),
+    ADD_FLOAT(oPosY,5),
+    SET_FLOAT(oCollisionDistance,2000),
+    SET_HOME(),
+    BEGIN_LOOP(),
+    CALL_NATIVE( bhv_lll_sinking_square_platforms_loop),
+    CALL_NATIVE( bhv_lll_sinking_square_platforms_loop),
+    CALL_NATIVE( load_object_collision_model),
+    END_LOOP(),
+};
