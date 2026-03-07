@@ -965,3 +965,100 @@ s32 unused_resolve_floor_or_ceil_collisions(s32 checkCeil, f32 *px, f32 *py, f32
 
     return 0;
 }
+
+static int find_floors_from_list(struct SurfaceNode *surfaceNode, s32 x, s32 z, struct SurfaceHeight *pfloors, int maxFloors) {
+    register struct Surface *surf;
+    register SurfaceType type = SURFACE_DEFAULT;
+
+    // Iterate through the list of floors until there are no more floors.
+    int output = 0;
+    while (surfaceNode != NULL) {
+        surf = surfaceNode->surface;
+        surfaceNode = surfaceNode->next;
+        type        = surf->type;
+
+        // To prevent the Merry-Go-Round room from loading when Mario passes above the hole that leads
+        // there, SURFACE_INTANGIBLE is used. This prevent the wrong room from loading, but can also allow
+        // Mario to pass through.
+        if (!(gCollisionFlags & COLLISION_FLAG_INCLUDE_INTANGIBLE) && (type == SURFACE_INTANGIBLE)) {
+            continue;
+        }
+
+        // Determine if we are checking for the camera or not.
+        if (gCollisionFlags & COLLISION_FLAG_CAMERA) {
+            if (surf->flags & SURFACE_FLAG_NO_CAM_COLLISION) {
+                continue;
+            }
+        } else if (type == SURFACE_CAMERA_BOUNDARY) {
+            continue; // If we are not checking for the camera, ignore camera only floors.
+        }
+
+        // Check that the point is within the triangle bounds.
+        if (!check_within_floor_triangle_bounds(x, z, surf)) continue;
+
+        struct SurfaceHeight* out = &pfloors[output++];
+        out->surf   = surf;
+        out->height = get_surface_height_at_location(x, z, surf);
+        
+        if (output == maxFloors) break;
+    }
+    return output;
+}
+
+static int find_ceils_from_list(struct SurfaceNode *surfaceNode, s32 x, s32 z, struct SurfaceHeight *pceils, int maxCeils) {
+    register struct Surface *surf;
+    SurfaceType type = SURFACE_DEFAULT;
+    int output = 0;
+    while (surfaceNode != NULL) {
+        surf = surfaceNode->surface;
+        surfaceNode = surfaceNode->next;
+        type = surf->type;
+
+        // Determine if checking for the camera or not
+        if (gCollisionFlags & COLLISION_FLAG_CAMERA) {
+            if (surf->flags & SURFACE_FLAG_NO_CAM_COLLISION) {
+                continue;
+            }
+        } else if (type == SURFACE_CAMERA_BOUNDARY) {
+            // Ignore camera only surfaces
+            continue;
+        }
+
+        // Check that the point is within the triangle bounds
+        if (!check_within_ceil_triangle_bounds(x, z, surf, 1.5f)) continue;
+
+        // Find the height of the ceil at the given location
+        struct SurfaceHeight* out = &pceils[output++];
+        out->surf   = surf;
+        out->height = get_surface_height_at_location(x, z, surf);
+
+        if (output == maxCeils) break;
+    }
+    return output;
+}
+
+int find_floors(int x, int z, struct SurfaceHeight *pfloors, int maxFloors)
+{
+    if (is_outside_level_bounds(x, z)) {
+        return 0;
+    }
+
+    s32 cellX = GET_CELL_COORD(x);
+    s32 cellZ = GET_CELL_COORD(z);
+
+    struct SurfaceNode *surfaceList = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_FLOORS];
+    return find_floors_from_list(surfaceList, x, z, pfloors, maxFloors);
+}
+
+int find_ceils(int x, int z, struct SurfaceHeight *pceils, int maxCeils)
+{
+    if (is_outside_level_bounds(x, z)) {
+        return 0;
+    }
+
+    s32 cellX = GET_CELL_COORD(x);
+    s32 cellZ = GET_CELL_COORD(z);
+
+    struct SurfaceNode *surfaceList = gStaticSurfacePartition[cellZ][cellX][SPATIAL_PARTITION_CEILS];
+    return find_ceils_from_list(surfaceList, x, z, pceils, maxCeils);
+}

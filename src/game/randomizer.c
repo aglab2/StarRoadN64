@@ -21,6 +21,28 @@
 #include "segment2.h"
 #include "game/emutest.h"
 
+// -8192.0f to 8192.0f gets clamped to 64 for precalc chances
+#define PRECALC_CELL_COUNT 64
+#define PRECALC_CELL_SIZE ((8192*2)/PRECALC_CELL_COUNT)
+#define TO_PRECALC_CELL(x) (((s32)(x + 8192)) / PRECALC_CELL_SIZE)
+#define TO_COORD_FROM_PRECALC_CELL(c) ((c) * PRECALC_CELL_SIZE - 8192 + PRECALC_CELL_SIZE / 2)
+
+struct Precalc
+{
+    u8 chances[PRECALC_CELL_COUNT][PRECALC_CELL_COUNT];
+    u32 chancesPerRowAccumulated[PRECALC_CELL_COUNT];
+    u32 chanceTotal;
+
+    // temp vars for precalc generation, not used at runtime
+    u8 chanceRaw0[PRECALC_CELL_COUNT*2][PRECALC_CELL_COUNT*2];
+    u8 chanceRaw1[PRECALC_CELL_COUNT*2][PRECALC_CELL_COUNT*2];
+};
+
+static struct Precalc* get_precalc()
+{
+    return (struct Precalc*) 0x80730000;
+}
+
 u32 Randomizer_gGameSeed = 0;
 
 u8 Randomizer_gIsSetSeed = FALSE;
@@ -642,7 +664,150 @@ void Randomizer_create_dynamic_avoidance_point(Vec3f pos, f32 radius, f32 height
     Randomizer_gNumDynamicAvoidancePoints++;
 }
 
-// #define DEBUG_FAIRNESS
+static inline void sh_swap(struct SurfaceHeight* a, struct SurfaceHeight* b)
+{
+    struct SurfaceHeight tmp;
+    tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+static void sh_inverse(struct SurfaceHeight* sh, int count)
+{
+    for (int i = 0; i < count / 2; i++) {
+        struct SurfaceHeight tmp;
+        sh_swap(&sh[i], &sh[count - 1 - i]);
+    }
+}
+
+// bubblesort will work well because it is extremely likely that array is sorted already
+static void sh_bubble_sort(struct SurfaceHeight* sh, int count)
+{
+    if (count < 2)
+        return;
+
+    int sorted;
+    do
+    {
+        sorted = 1;
+        for (int i = 0; i < count - 1; i++)
+        {
+            struct SurfaceHeight* a = &sh[i + 0];
+            struct SurfaceHeight* b = &sh[i + 1];
+            if (a->height < b->height)
+            {
+                sorted = 0;
+                sh_swap(a, b);
+            }
+        }
+    }
+    while (!sorted);
+}
+
+struct Region
+{
+    f32 floor, ceil;
+};
+
+struct RegionsScanContext
+{
+    struct SurfaceHeight floors[16];
+    struct SurfaceHeight ceils[16];
+    int floorsCursor;
+    int ceilsCursor;
+    int floorsCount;
+    int ceilsCount;
+};
+
+struct RegionScanNext
+{
+    struct SurfaceHeight* sh;
+    int isCeil;
+};
+
+static struct RegionScanNext rsc_get_next(struct RegionsScanContext* ctx)
+{
+    struct SurfaceHeight* nextFloor = ctx->floorsCursor < ctx->floorsCount ? &ctx->floors[ctx->floorsCursor] : NULL;
+    struct SurfaceHeight* nextCeil  = ctx->ceilsCursor  < ctx->ceilsCount  ? &ctx->ceils[ctx->ceilsCursor]   : NULL;
+
+    if (nextFloor && nextCeil) {
+        if (nextFloor->height > nextCeil->height) {
+            ctx->floorsCursor++;
+            return (struct RegionScanNext){ nextFloor, 0 };
+        } else {
+            ctx->ceilsCursor++;
+            return (struct RegionScanNext){ nextCeil, 1 };
+        }
+    } else if (nextFloor) {
+        ctx->floorsCursor++;
+        return (struct RegionScanNext){ nextFloor, 0 };
+    } else if (nextCeil) {
+        ctx->ceilsCursor++;
+        return (struct RegionScanNext){ nextCeil, 1 };
+    } else {
+        return (struct RegionScanNext){ 0 };
+    }
+}
+
+static int make_regions(int x, int z, struct Region* regions, int regionsCount, f32 maxY)
+{
+    struct RegionsScanContext ctx = {0};
+
+    ctx.floorsCount = find_floors(x, z, ctx.floors, 16);
+    ctx.ceilsCount  = find_ceils (x, z, ctx.ceils, 16);
+
+    sh_inverse(ctx.ceils     , ctx.ceilsCount);
+    sh_bubble_sort(ctx.floors, ctx.floorsCount);
+    sh_bubble_sort(ctx.ceils , ctx.ceilsCount);
+
+    // start scanning down the floors and ceilings...
+    int inCeil = 1; // because we assume that top is the ceiling
+    int regionsOutput = 0;
+    f32 height = maxY;
+
+    while (regionsOutput < regionsCount)
+    {
+        struct RegionScanNext next = rsc_get_next(&ctx);
+        if (!next.sh)
+            break;
+
+        if (next.sh->height > height)
+            continue;
+
+        if (inCeil)
+        {
+            if (next.isCeil)
+            {
+                // lower the ceiling, keep pending the region
+                height = next.sh->height;
+            }
+            else
+            {
+                // floor found, output the region
+                regions[regionsOutput++] = (struct Region){ .floor = next.sh->height, .ceil = height };
+                height = next.sh->height;
+                inCeil = 0;
+            }
+        }
+        else // in floor
+        {
+            if (next.isCeil)
+            {
+                // start next floors
+                height = next.sh->height;
+                inCeil = 1;
+            }
+            else
+            {
+                // still more floors coming, ignore as it is cover by floor above
+            }
+        }
+    }
+
+    return regionsOutput;
+}
+
+#define DEBUG_FAIRNESS
 #ifdef DEBUG_FAIRNESS
 int gFailReasons[30] = {0};
 #define LOG_FAIL(idx) do { gFailReasons[(idx) + 1]++; } while(0)
@@ -698,8 +863,10 @@ void Randomizer_get_safe_position(struct Object *obj, Vec3s pos, f32 minHeightRa
         u32 dangerShiftedOverHighFloor = FALSE;
 
         // Generate random position
-        pos[1] = Randomizer_get_val_in_range_uniform(minY, maxY, randomState);
+        int lowDiff = 800;
 
+#if 0
+        pos[1] = Randomizer_get_val_in_range_uniform(minY, maxY, randomState);
         if (gCurrCourseNum == COURSE_HMC)
         {
             if (pos[1] < 1743)
@@ -788,12 +955,51 @@ void Randomizer_get_safe_position(struct Object *obj, Vec3s pos, f32 minHeightRa
             if (lowFloor == NULL) { LOG_FAIL(0); continue; }
         }
 
-        int lowDiff = 800;
         if ((pos[1] - lowFloorHeight) > lowDiff) { LOG_FAIL(1); continue; }
 
         if (lowFloorHeight + 20 <= maxY) {
             pos[1] = lowFloorHeight + 20;
         }
+#else
+        struct Precalc* precalc = get_precalc();
+        // Pick random position accounted for table precalcs
+        int minCellX = TO_PRECALC_CELL(minX);
+        int maxCellX = TO_PRECALC_CELL(maxX);
+        int minCellZ = TO_PRECALC_CELL(minZ);
+        int maxCellZ = TO_PRECALC_CELL(maxZ);
+
+        int cellX, cellZ;
+        {
+            int which = Randomizer_get_val_in_range_uniform(0, precalc->chanceTotal, randomState);
+            for (cellX = minCellX; cellX <= maxCellX; cellX++) {
+                if (which < precalc->chancesPerRowAccumulated[cellX])
+                    break;
+            }
+
+            if (cellX != minCellX)
+                which -= precalc->chancesPerRowAccumulated[cellX - 1];
+
+            for (cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
+                which -= precalc->chances[cellX][cellZ];
+                if (which < 0)
+                    break;
+            }
+        }
+
+        pos[0] = CLAMP(TO_COORD_FROM_PRECALC_CELL(cellX) - Randomizer_get_val_in_range_uniform(0, PRECALC_CELL_SIZE, randomState), minX, maxX);
+        pos[2] = CLAMP(TO_COORD_FROM_PRECALC_CELL(cellZ) - Randomizer_get_val_in_range_uniform(0, PRECALC_CELL_SIZE, randomState), minZ, maxZ);
+
+        struct Region regions[15];
+        int regionsCount = make_regions(pos[0], pos[2], regions, 15, maxY);
+        if (0 == regionsCount)
+        {
+            LOG_FAIL(-1); 
+            continue;
+        }
+
+        struct Region region = regions[(int) Randomizer_get_val_in_range_uniform(0, regionsCount, randomState)];
+        pos[1] = region.floor + 20;
+#endif
 
         // Move out of any walls. This has to be done here because otherwise
         // there's the possibility of being pushed out of the wall into OoB or a ceiling
@@ -1389,4 +1595,89 @@ void Randomizer_set_mario_rando_colors(void) {
         set_coin_color(blues[0], blues[1], blues[2], coin_seg3_vertex_blue);
         set_coin_color(blues[0], blues[1], blues[2], coin_seg3_vertex_blue_r);
     }
+}
+
+static inline void inc_unaligned32(u8* ptr, u32 val)
+{
+    PUT_UNALIGNED4(GET_UNALIGNED4(ptr) + val, ptr);
+}
+
+void Randomizer_precalc_probability_tables()
+{
+    struct Precalc* precalc = get_precalc();
+    *precalc = (struct Precalc){0};
+
+    const struct Randomizer_AreaParams *areaParams = &(*Randomizer_sLevelParams[gCurrLevelNum - 4])[gCurrAreaIndex - 1];
+
+    int minX = CLAMP(areaParams->minX - PRECALC_CELL_SIZE, -8192, 8191);
+    int maxX = CLAMP(areaParams->maxX + PRECALC_CELL_SIZE, -8192, 8191);
+    int minZ = CLAMP(areaParams->minZ - PRECALC_CELL_SIZE, -8192, 8191);
+    int maxZ = CLAMP(areaParams->maxZ + PRECALC_CELL_SIZE, -8192, 8191);
+
+    int minCellX = TO_PRECALC_CELL(minX);
+    int maxCellX = TO_PRECALC_CELL(maxX);
+    int minCellZ = TO_PRECALC_CELL(minZ);
+    int maxCellZ = TO_PRECALC_CELL(maxZ);
+
+    // calculate raw chances based on regions, max 15
+    for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
+        for (int cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
+            int x = TO_COORD_FROM_PRECALC_CELL(cellX);
+            int z = TO_COORD_FROM_PRECALC_CELL(cellZ);
+            struct Region regions[15];
+            precalc->chanceRaw0[cellX+16][cellZ+16] = make_regions(x, z, regions, 15, areaParams->maxY);
+        }
+    }
+    
+    int minCellZ4 = minCellZ / 4;
+    int maxCellZ4 = maxCellZ / 4;
+
+    // apply gaussian blur
+    for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
+        // guaranteed aligned
+        u32* chanceColumnP    = (u32*) precalc->chanceRaw1[cellX+16 - 1];
+        u32* chanceColumn     = (u32*) precalc->chanceRaw1[cellX+16 + 0];
+        u32* chanceColumnN    = (u32*) precalc->chanceRaw1[cellX+16 + 1];
+
+        u8* chanceColumnP8    = (u8*)chanceColumnP;
+        u8* chanceColumn8     = (u8*)chanceColumn;
+        u8* chanceColumnN8    = (u8*)chanceColumnN;
+
+        for (int cellZ4 = minCellZ4; cellZ4 <= maxCellZ4; cellZ4++) {
+            u32* chanceRawColumn = (u32*) precalc->chanceRaw0[cellX+16];
+            u32 val = chanceRawColumn[cellZ4+4];
+            chanceColumn [cellZ4+4] += 4*val;
+            
+            chanceColumnP[cellZ4+4] += 2*val;
+            chanceColumnN[cellZ4+4] += 2*val;
+            inc_unaligned32(&chanceColumn8[16+4*cellZ4-1], 2*val);
+            inc_unaligned32(&chanceColumn8[16+4*cellZ4+1], 2*val);
+
+            inc_unaligned32(&chanceColumnP8[16+4*cellZ4-1], val);
+            inc_unaligned32(&chanceColumnP8[16+4*cellZ4+1], val);
+            inc_unaligned32(&chanceColumnN8[16+4*cellZ4-1], val);
+            inc_unaligned32(&chanceColumnN8[16+4*cellZ4+1], val);
+        }
+    }
+
+    // copy to final table for sane presentation
+    for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
+        // guaranteed aligned
+        u32* chanceColumnRaw = (u32*) precalc->chanceRaw1[cellX+16];
+        u32* chanceColumn    = (u32*) precalc->chances   [cellX   ];
+        for (int cellZ4 = minCellZ4; cellZ4 <= maxCellZ4; cellZ4++) {
+            chanceColumn[cellZ4] = chanceColumnRaw[cellZ4+4];
+        }
+    }
+
+    // calculate totals
+    u32 total = 0;
+    for (int cellX = minCellX; cellX <= maxCellX; cellX++) {
+        for (int cellZ = minCellZ; cellZ <= maxCellZ; cellZ++) {
+            total += precalc->chances[cellX][cellZ];
+        }
+        precalc->chancesPerRowAccumulated[cellX] = total;
+    }
+
+    precalc->chanceTotal = total;
 }

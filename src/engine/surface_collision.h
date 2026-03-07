@@ -60,6 +60,16 @@ s32 get_room_at_pos(f32 x, f32 y, f32 z);
 s32 find_water_level_and_floor(s32 x, s32 y, s32 z, struct Surface **pfloor);
 s32 find_water_level(s32 x, s32 z);
 s32 find_poison_gas_level(s32 x, s32 z);
+
+struct SurfaceHeight
+{
+    struct Surface *surf;
+    f32 height;
+};
+
+int find_floors(int xPos, int zPos, struct SurfaceHeight *pfloors, int maxFloors);
+int find_ceils(int xPos, int zPos, struct SurfaceHeight *pceils, int maxCeils);
+
 #ifdef VANILLA_DEBUG
 void debug_surface_list_info(f32 xPos, f32 zPos);
 #endif

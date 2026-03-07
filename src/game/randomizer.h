@@ -13,20 +13,20 @@ enum Randomizer_AvoidanceSafety {
 struct Randomizer_AvoidancePoint {
     const uintptr_t *behavior;
     Vec3s pos;
-    f32 radius;
-    f32 height;
+    s16 radius;
+    s16 height;
     u32 safety;
 };
 
 typedef const struct Randomizer_AvoidancePoint Randomizer_AvoidancePointArray[];
 
 struct Randomizer_AreaParams {
-    f32 minX;
-    f32 maxX;
-    f32 minY;
-    f32 maxY;
-    f32 minZ;
-    f32 maxZ;
+    s16 minX;
+    s16 maxX;
+    s16 minY;
+    s16 maxY;
+    s16 minZ;
+    s16 maxZ;
 
     u8 stub;
     u32 numAvoidancePoints;
@@ -140,5 +140,6 @@ extern u8 Randomizer_expected_mini_level_target(u8 currLevel);
 extern void Randomizer_print_seed_and_options_data(void);
 extern void Randomizer_set_mario_rando_colors(void);
 extern void Randomizer_init_star_color(struct Object *star, s32 courseID, s32 starID);
+extern void Randomizer_precalc_probability_tables();
 
 #endif

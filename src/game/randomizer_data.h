@@ -146,10 +146,10 @@ static const struct Randomizer_AreaParams bobParams[] = {
     {-7356, 7474, -3498, 2350, -8000, 6700, 0, 0, NULL}
 };
 static const struct Randomizer_AreaParams wfParams[] = {
-    {-6000, 8192, -2166, 3564, -7200, 7000, 0, 0, NULL}
+    {-6000, 8191, -2166, 3564, -7200, 7000, 0, 0, NULL}
 };
 static const struct Randomizer_AreaParams jrbParams[] = {
-    {-8192, 8192, -2546, 3900, -7600, 8192, 0, 0, NULL}
+    {-8192, 8191, -2546, 3900, -7600, 8191, 0, 0, NULL}
 };
 static const struct Randomizer_AreaParams ccmParams[] = {
     {-7146, 7194, -5650, 5090, -6624, 7637, 0, 0, NULL}
@@ -158,7 +158,7 @@ static const struct Randomizer_AreaParams bbhParams[] = {
     {-8192, 7266, -1977, 3000, -7124, 6318, 0, 0, NULL}
 };
 static const struct Randomizer_AreaParams hmcParams[] = {
-    {-7133, 8192, -7363, 3929, -8192, 8192, 0, 0, NULL}
+    {-7133, 8191, -7363, 3929, -8192, 8191, 0, 0, NULL}
 };
 static const struct Randomizer_AreaParams lllParams[] = {
     {-7603, 6600, -3979, 5183, -7900, 6342, 0, 0, NULL}
@@ -219,13 +219,13 @@ static const struct Randomizer_AreaParams bitsParams[] = {
 
 // Castle areas
 static const struct Randomizer_AreaParams cgParams[] = {
-    {-7956, 8192, -1798, 6841, -7460, 7913, 0, 0, NULL}
+    {-7956, 8191, -1798, 6841, -7460, 7913, 0, 0, NULL}
 };
 static const struct Randomizer_AreaParams ccParams[] = {
-    {-3878, 8192, -3986, 4380, -3423, 7664, 0, ARRAY_SIZE(ccAvoidancePoints), &ccAvoidancePoints}
+    {-3878, 8191, -3986, 4380, -3423, 7664, 0, ARRAY_SIZE(ccAvoidancePoints), &ccAvoidancePoints}
 };
 static const struct Randomizer_AreaParams icParams[] = {
-    {-6292, 4951, -436, 1800, -7893, 8192, 0, 0, NULL}
+    {-6292, 4951, -436, 1800, -7893, 8191, 0, 0, NULL}
 };
 
 static const struct Randomizer_AreaParams b1fParams[] = {

@@ -350,6 +350,7 @@ void load_area(s32 index) {
 
         if (gCurrentArea->terrainData != NULL) {
             load_area_terrain(gCurrentArea->terrainData, gCurrentArea->surfaceRooms);
+            Randomizer_precalc_probability_tables();
         }
 
         if (gCurrentArea->objectSpawnInfos != NULL) {
