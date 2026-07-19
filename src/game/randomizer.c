@@ -605,6 +605,13 @@ static u32 is_in_avoidance_point(Vec3s pos, const struct Randomizer_AreaParams *
         }
     }
 
+    if (gCurrCourseNum == COURSE_JRB)
+    {
+        if ((-5267 < pos[0]) && (pos[0] < -4499) && (-3792 < pos[2]) && (pos[2] < -2640) && pos[1] < 1293) {
+            return TRUE;
+        }
+    }
+
     return FALSE;
 }
 
@@ -934,9 +941,7 @@ static void Randomizer_get_safe_position_impl(const BehaviorScript* bhv, Vec3s p
             if ((objCanBeUnderwater && (waterLevel > maxHeight))
                 || (randPosFlags & RAND_TYPE_MUST_BE_UNDERWATER))
                 {
-                    // Clamp underwater height to ceiling - helps CCCoral
-                    cHeight = find_ceil(pos[0], pos[1], pos[2], &ceil);
-                    maxHeight = MIN(waterLevel, cHeight);
+                    maxHeight = waterLevel;
                 }
         }
 
@@ -944,6 +949,21 @@ static void Randomizer_get_safe_position_impl(const BehaviorScript* bhv, Vec3s p
         if ((bhv == bhvSpinAirborneWarp) && (waterLevel > pos[1])) {
             minHeight = waterLevel + minHeightRange;
             maxHeight = waterLevel + maxHeightRange;
+        }
+
+        if (gCurrCourseNum == COURSE_HMC || gCurrCourseNum == COURSE_JRB || (gCurrCourseNum == COURSE_CCM && pos[1] < -4000.f))
+        {
+            cHeight = find_ceil(pos[0], pos[1], pos[2], &ceil) - 100.f;
+            if (cHeight < maxHeight) {
+                maxHeight = cHeight;
+            }
+            if (maxHeight < minHeight) {
+                minHeight = pos[1];
+            }
+
+            if (maxHeight < minHeight) {
+                LOG_FAIL(14); continue;
+            }
         }
 
 #if 0
