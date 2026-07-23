@@ -126,6 +126,10 @@ static const struct Randomizer_AvoidancePoint slrAvoidancePoints[] = {
     {bhvMario, {7493, 250, -5216}, 1100.0f, 750.0f, Randomizer_AVOIDANCE_SAFETY_ALL}, // purple switch cage
 };
 
+static const struct Randomizer_AvoidancePoint pppAvoidancePoints[] = {
+    {bhvStub, {7340, -1236, -5975}, 1200.0f, 1200.0f, Randomizer_AVOIDANCE_SAFETY_ALL}, // underwater cage
+};
+
 static const struct Randomizer_AvoidancePoint llfAvoidancePoints[] = {
     {bhvStub, {-30, -2400, 2400}, 130.0f, 2450.0f, Randomizer_AVOIDANCE_SAFETY_ALL}, // mushroom in tree
 };
@@ -204,7 +208,7 @@ static const struct Randomizer_AreaParams wfParams[] = {
     {-6000, 8192, -2166, 3564, -7200, 7000, 0, ARRAY_SIZE(slrAvoidancePoints), &slrAvoidancePoints}
 };
 static const struct Randomizer_AreaParams jrbParams[] = {
-    {-8192, 8192, -2546, 3900, -7600, 8192, 0, 0, NULL}
+    {-8192, 8192, -2546, 3900, -7600, 8192, 0, ARRAY_SIZE(pppAvoidancePoints), &pppAvoidancePoints}
 };
 static const struct Randomizer_AreaParams ccmParams[] = {
     {-7146, 7194, -5650, 5090, -6624, 7637, 0, 0, NULL}
