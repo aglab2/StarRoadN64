@@ -21,7 +21,7 @@
 #include "segment2.h"
 #include "game/emutest.h"
 
-u32 Randomizer_gGameSeed = 2703805;
+u32 Randomizer_gGameSeed = 75120;
 
 u8 Randomizer_gIsSetSeed = FALSE;
 

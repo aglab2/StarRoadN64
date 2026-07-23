@@ -197,6 +197,10 @@ static const struct Randomizer_AvoidancePoint ow3AvoidancePoints[] = {
     {bhvStub, {-1447, 90, -3308}, 500.0f, 600.0f, Randomizer_AVOIDANCE_SAFETY_ALL} // top of the roof
 };
 
+static const struct Randomizer_AvoidancePoint mmtAvoidancePoints[] = {
+    {bhvStub, {2416, 966, -6147}, 1000.0f, 1000.0f, Randomizer_AVOIDANCE_SAFETY_HARD} // mushroom for secret star
+};
+
 
 // {Xmin, Xmax, Ymin, Ymax, Zmin, Zmax, 0, 0, NULL}
 
@@ -250,7 +254,7 @@ static const struct Randomizer_AreaParams rrParams[] = {
 
 // Secret courses
 static const struct Randomizer_AreaParams pssParams[] = {
-    {-6191, 6539, -2302, 4725, -6828, 6896, 0, 0, NULL}
+    {-6191, 6539, -2302, 4725, -6828, 6896, 0, ARRAY_SIZE(mmtAvoidancePoints), &mmtAvoidancePoints}
 };
 static const struct Randomizer_AreaParams saParams[] = {
     {-6262, 6626, -6010, 4106, -6933, 5629, 0, 0, NULL}
