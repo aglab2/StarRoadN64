@@ -142,6 +142,7 @@ static const struct Randomizer_AvoidancePoint mmmAvoidancePoints[] = {
 
 static const struct Randomizer_AvoidancePoint micrAvoidancePoints[] = {
     {bhvStub, {-898, -2910, -4833}, 2400.0f, 2900.0f, Randomizer_AVOIDANCE_SAFETY_ALL}, // Snow pile in bottom
+    {bhvStub, {-898, -2910, -4833}, 2400.0f, 3900.0f, Randomizer_AVOIDANCE_SAFETY_HARD}, // Snow pile in bottom
     {bhvSmallPenguin, {-1003, -814, 3077}, 2000.0f, 2900.0f, Randomizer_AVOIDANCE_SAFETY_HARD}, // bottom requires jumping
     {bhvSmallPenguin, {6546, 1728, -6428}, 700.0f, 2900.0f, Randomizer_AVOIDANCE_SAFETY_ALL}, // hidden mountain side
 };

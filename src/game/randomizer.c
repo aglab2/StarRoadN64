@@ -21,7 +21,7 @@
 #include "segment2.h"
 #include "game/emutest.h"
 
-u32 Randomizer_gGameSeed = 75120;
+u32 Randomizer_gGameSeed = 4851010;
 
 u8 Randomizer_gIsSetSeed = FALSE;
 
@@ -565,9 +565,9 @@ static u8 is_floor_safe(struct Surface *floor, u8 floorSafeLevel,
 }
 
 // Checks if near a specific avoidance point
-static u32 check_avoidance_point(Vec3s pos, BehaviorScript* bhv, const struct Randomizer_AvoidancePoint *avoidancePoint) {
+static u32 check_avoidance_point(Vec3s pos, const BehaviorScript* bhv, const struct Randomizer_AvoidancePoint *avoidancePoint) {
     const void *behavior = avoidancePoint->behavior;
-        
+
     if(((avoidancePoint->safety == Randomizer_AVOIDANCE_SAFETY_ALL) 
     || ((avoidancePoint->safety == Randomizer_AVOIDANCE_SAFETY_MED) && (Randomizer_gOptionsSettings.gameplay.s.safeSpawns == Randomizer_SPAWN_SAFETY_SAFE))
     || ((avoidancePoint->safety == Randomizer_AVOIDANCE_SAFETY_HARD) && (Randomizer_gOptionsSettings.gameplay.s.safeSpawns != Randomizer_SPAWN_SAFETY_HARD)))){
@@ -579,15 +579,18 @@ static u32 check_avoidance_point(Vec3s pos, BehaviorScript* bhv, const struct Ra
         return FALSE;
     }
 
-    if ((sqr(pos[0] - avoidancePoint->pos[0]) + sqr(pos[2] - avoidancePoint->pos[2]) < sqr(avoidancePoint->radius))
-        && (pos[1] > avoidancePoint->pos[1]) && (pos[1] < avoidancePoint->pos[1] + avoidancePoint->height)) {
+    int dx = pos[0] - avoidancePoint->pos[0];
+    int dz = pos[2] - avoidancePoint->pos[2];
+
+    if ((dx*dx + dz*dz < avoidancePoint->radius*avoidancePoint->radius)
+     && (pos[1] > avoidancePoint->pos[1]) && (pos[1] < avoidancePoint->pos[1] + avoidancePoint->height)) {
         return TRUE;
     }
     return FALSE;
 }
 
 // Checks if near any avoidance point
-static u32 is_in_avoidance_point(Vec3s pos, const struct Randomizer_AreaParams *areaParams, BehaviorScript* bhv) {
+static u32 is_in_avoidance_point(Vec3s pos, const struct Randomizer_AreaParams *areaParams, const BehaviorScript* bhv) {
     const struct Randomizer_AvoidancePoint *avoidancePoint;
 
     for (u32 i = 0; i < areaParams->numAvoidancePoints; i++) {
@@ -1508,7 +1511,7 @@ s32 Randomizer_init_randomizer_test(s32, s32 v)
 {
     Randomizer_gOverwriteFileOptions = 1;
     Randomizer_gOverwriteFileSeed = 1;
-    Randomizer_gOptionsSettings = Randomizer_gPresets[1];
+    Randomizer_gOptionsSettings = Randomizer_gPresets[0];
     Randomizer_init_randomizer(v);
     return v;
 }
