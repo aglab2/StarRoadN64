@@ -848,8 +848,15 @@ static void Randomizer_get_safe_position_impl(const BehaviorScript* bhv, Vec3s p
             if (pos[1] > 1620)
             {
                 minZ = 144;
-                maxZ = 7183;   
+                maxZ = 7183;
             }
+            if (pos[1] > 3101)
+            {
+                maxX = 1800;
+                minX = -5198;
+                minZ = 667;
+                maxX = 5000;
+            } 
             if (pos[1] < -870)
             {
                 maxZ = 3065;   
@@ -895,6 +902,18 @@ static void Randomizer_get_safe_position_impl(const BehaviorScript* bhv, Vec3s p
                 LOG_FAIL(-1); 
             }
             while (!lowFloor || lowFloor->type == SURFACE_DEATH_PLANE);
+        }
+        else if (gCurrLevelNum == LEVEL_PSS && pos[1] > 1620)
+        {
+            do
+            {
+                pos[0] = Randomizer_get_val_in_range_uniform(minX, maxX, randomState);
+                pos[2] = Randomizer_get_val_in_range_uniform(minZ, maxZ, randomState);
+
+                lowFloorHeight = find_floor(pos[0], pos[1] + 20, pos[2], &lowFloor);
+                LOG_FAIL(-1); 
+            }
+            while (lowFloorHeight < 0.f);
         }
         else
         {
