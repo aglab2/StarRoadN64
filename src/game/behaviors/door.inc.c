@@ -166,6 +166,7 @@ static void* get_baked_texture(void) {
 }
 
 void bhv_door_init(void) {
+    bhv_warp_init();
     const f32 checkDist = 200.0f;
 
     f32 x = o->oPosX;
