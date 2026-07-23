@@ -21,7 +21,7 @@
 #include "segment2.h"
 #include "game/emutest.h"
 
-u32 Randomizer_gGameSeed = 7224515;
+u32 Randomizer_gGameSeed = 2703805;
 
 u8 Randomizer_gIsSetSeed = FALSE;
 
@@ -521,11 +521,8 @@ static u8 is_floor_safe(struct Surface *floor, u8 floorSafeLevel,
                 case LEVEL_THI:
                     norm = 0.891f;
                     break;
-                case LEVEL_TTC:
-                    norm = 0.71f;
-                    break;
                 default:
-                    norm = 0.7f;
+                    norm = 0.708f;
                     break;
             }
     }
