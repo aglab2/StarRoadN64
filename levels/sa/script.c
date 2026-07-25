@@ -20,7 +20,7 @@
 #define sa_area_1_collision col_sa_1_0xe02b100
 extern const GeoLayout Geo_sa_1_0x2001700[];
 #define sa_area_1 Geo_sa_1_0x2001700
-
+extern const BehaviorScript bhvSparkler[];
 #define bhvClockMinuteHand bhvStarRoadStarReplica
 /* Fast64 end persistent block [scripts] */
 
@@ -126,10 +126,13 @@ const LevelScript level_sa_entry[] = {
 		OBJECT_WITH_ACTS(0,1500,2913,2602,0,100,0,0x0, bhvCoinFormation,31),
 		OBJECT_WITH_ACTS(0,5628,-5340,-3230,0,0,0,0x0, bhvCoinFormation,31),
 		OBJECT_WITH_ACTS(MODEL_RED_COIN_RADAR,0,0,0,0,0,0,0<<24, bhvRedCoinRadar, 31),
+		OBJECT_WITH_ACTS(0,5370,1123,-3299,0,0,0,0xb0000, bhvFadingWarp,31),
+		OBJECT_WITH_ACTS(0,5370,1123,-3299,0,0,0,0xb0000, bhvSparkler,31),
+		OBJECT_WITH_ACTS(0,3415,4532,2273,0,-90,0,0xc0000, bhvFadingWarp,31),
 
 		WARP_NODE(10,9,1,10,0),
-		WARP_NODE(11,9,1,12,0),
-		WARP_NODE(12,9,1,11,0),
+		WARP_NODE(11,LEVEL_SA,1,12,0),
+		WARP_NODE(12,LEVEL_SA,1,11,0),
 		WARP_NODE(13,9,1,14,0),
 		WARP_NODE(14,9,1,13,0),
 		WARP_NODE(240,26,1,15,0),

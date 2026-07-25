@@ -9,7 +9,7 @@
 
 #include "config.h"
 
-#define TEST_LEVEL LEVEL_SL
+#define TEST_LEVEL LEVEL_SA
 
 extern s32 Randomizer_init_randomizer_test(s32, s32);
 

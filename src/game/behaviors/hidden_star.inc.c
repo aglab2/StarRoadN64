@@ -29,6 +29,21 @@ void bhv_hidden_star_loop(void) {
     }
 }
 
+void bhv_sparkle_circle(void)
+{
+    if (gGlobalTimer % 5 == 0) {
+        int count = 3;
+        for (int i = 0; i < count; i++)
+        {
+            struct Object *sparkle = spawn_object(o, MODEL_SPARKLES, bhvCoinSparkles);
+            int angle = gGlobalTimer * 630 + i * (0x10000 / count);
+            sparkle->oPosX += 100 * sins(angle);
+            sparkle->oPosY -= 35;
+            sparkle->oPosZ += 100 * coss(angle);
+        }
+    }
+}
+
 extern const BehaviorScript bhvCheckMark[];
 void bhv_hidden_star_trigger_loop(void) {
     if (gGlobalTimer % 5 == 0) {

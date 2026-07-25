@@ -4800,6 +4800,14 @@ const BehaviorScript bhvHiddenStarTrigger[] = {
     END_LOOP(),
 };
 
+extern void bhv_sparkle_circle(void);
+const BehaviorScript bhvSparkler[] = {
+    BEGIN(OBJ_LIST_LEVEL),
+    BEGIN_LOOP(),
+        CALL_NATIVE(bhv_sparkle_circle),
+    END_LOOP(),
+};
+
 const BehaviorScript bhvTtmRollingLog[] = {
     BEGIN(OBJ_LIST_SURFACE),
     OR_INT(oFlags, (OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
