@@ -783,7 +783,7 @@ static void Randomizer_get_safe_position_impl(const BehaviorScript* bhv, Vec3s p
             }
             if (pos[1] < -4251)
             {
-                if ((tinymt32_generate_u32(randomState) & 15) != 0)
+                if ((tinymt32_generate_u32(randomState) & 7) != 0)
                 {continue;}
 
                 maxZ = 6531;
