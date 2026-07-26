@@ -903,17 +903,35 @@ static void Randomizer_get_safe_position_impl(const BehaviorScript* bhv, Vec3s p
             }
             while (!lowFloor || lowFloor->type == SURFACE_DEATH_PLANE);
         }
-        else if (gCurrLevelNum == LEVEL_PSS && pos[1] > 1620)
+        else if (gCurrLevelNum == LEVEL_PSS)
         {
-            do
+            if (pos[1] > 1620)
             {
-                pos[0] = Randomizer_get_val_in_range_uniform(minX, maxX, randomState);
-                pos[2] = Randomizer_get_val_in_range_uniform(minZ, maxZ, randomState);
+                do
+                {
+                    pos[0] = Randomizer_get_val_in_range_uniform(minX, maxX, randomState);
+                    pos[2] = Randomizer_get_val_in_range_uniform(minZ, maxZ, randomState);
+
+                    lowFloorHeight = find_floor(pos[0], pos[1] + 20, pos[2], &lowFloor);
+                    LOG_FAIL(-1); 
+                }
+                while (lowFloorHeight < 0.f);
+            }
+            else
+            {
+                do
+                {
+                    pos[0] = Randomizer_get_val_in_range_uniform(minX, maxX, randomState);
+                    pos[2] = Randomizer_get_val_in_range_uniform(minZ, maxZ, randomState);
+
+                    lowFloorHeight = find_floor(pos[0], 20000, pos[2], &lowFloor);
+                    LOG_FAIL(-1); 
+                }
+                while (lowFloorHeight > 1000.f);
 
                 lowFloorHeight = find_floor(pos[0], pos[1] + 20, pos[2], &lowFloor);
-                LOG_FAIL(-1); 
+                if (lowFloor == NULL) { LOG_FAIL(0); continue; }
             }
-            while (lowFloorHeight < 0.f);
         }
         else
         {
