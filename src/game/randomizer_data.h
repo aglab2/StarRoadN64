@@ -190,6 +190,7 @@ extern const BehaviorScript bhvStarRoadSRRoomba[];
 static const struct Randomizer_AvoidancePoint c15AvoidancePoints[] = {
     {bhvStub, {3900, -3008, -4141}, 600.0f, 1000.0f, Randomizer_AVOIDANCE_SAFETY_ALL}, // bulb1
     {bhvStub, {3900, -2008, -4141}, 1000.0f, 1200.0f, Randomizer_AVOIDANCE_SAFETY_ALL}, // bulb2
+    {bhvStub, {3061, -1255, 4807}, 900.0f, 600.0f, Randomizer_AVOIDANCE_SAFETY_ALL}, // cannon base
 
     {bhvStarRoadSRRoomba, {3168, -5940, -6155}, 3000.0f, 3000.0f, Randomizer_AVOIDANCE_SAFETY_ALL}, // no roombas near eyerock
 };
