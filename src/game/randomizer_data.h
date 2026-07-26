@@ -209,6 +209,10 @@ static const struct Randomizer_AvoidancePoint slideAvoidancePoints[] = {
     {bhvStub, {3847, -1742, -4624}, 1000.0f, 2000.0f, Randomizer_AVOIDANCE_SAFETY_HARD}, // rocks3
 };
 
+static const struct Randomizer_AvoidancePoint wcAvoidancePoints[] = {
+    {bhvCapSwitch, {0, 5000, 0}, 10000.0f, 10000.0f, Randomizer_AVOIDANCE_SAFETY_ALL}, // mushroom in tree
+};
+
 
 
 // {Xmin, Xmax, Ymin, Ymax, Zmin, Zmax, 0, 0, NULL}
@@ -272,7 +276,7 @@ static const struct Randomizer_AreaParams wmotrParams[] = {
     {-6694, 5039, -1385, 6180, -4827, 6362, 0, 0, NULL}
 };
 static const struct Randomizer_AreaParams totwcParams[] = {
-    {-6070, 5392, -2348, 7470, -5409, 6683, 0, 0, NULL}
+    {-6070, 5392, -2348, 7470, -5409, 6683, 0, ARRAY_SIZE(wcAvoidancePoints), &wcAvoidancePoints}
 };
 static const struct Randomizer_AreaParams cotmcParams[] = {
     {-6762, 5286, 4400, 10920, -3896, 5550, 0, 0, NULL}
