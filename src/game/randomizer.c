@@ -706,6 +706,15 @@ static void Randomizer_get_safe_position_impl(const BehaviorScript* bhv, Vec3s p
         }
     }
 
+    static u8 flip = 0;
+    if (gCurrCourseNum == COURSE_VCUTM)
+    {
+        if (bhv == bhvExclamationBox)
+        {
+            flip = !flip;
+        }
+    }
+
     while (TRUE) {
         minX = areaParams->minX;
         maxX = areaParams->maxX;
@@ -790,6 +799,21 @@ static void Randomizer_get_safe_position_impl(const BehaviorScript* bhv, Vec3s p
                 minZ = 3016;
                 maxX = 4233;
                 minX = 1755;
+            }
+        }
+
+        if (gCurrCourseNum == COURSE_VCUTM)
+        {
+            if (bhv == bhvExclamationBox)
+            {
+                if (flip)
+                {
+                    maxX = 1300;
+                }
+                else
+                {
+                    minX = 1546;
+                }
             }
         }
 
