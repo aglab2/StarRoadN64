@@ -783,6 +783,9 @@ static void Randomizer_get_safe_position_impl(const BehaviorScript* bhv, Vec3s p
             }
             if (pos[1] < -4251)
             {
+                if ((tinymt32_generate_u32(randomState) & 15) != 0)
+                {continue;}
+
                 maxZ = 6531;
                 minZ = 3016;
                 maxX = 4233;
@@ -988,7 +991,7 @@ static void Randomizer_get_safe_position_impl(const BehaviorScript* bhv, Vec3s p
             maxHeight = waterLevel + maxHeightRange;
         }
 
-        if (gCurrCourseNum == COURSE_HMC || gCurrCourseNum == COURSE_JRB || (gCurrCourseNum == COURSE_CCM && pos[1] < -4000.f))
+        if (gCurrCourseNum == COURSE_HMC || (gCurrCourseNum == COURSE_CCM && pos[1] < -4000.f))
         {
             cHeight = find_ceil(pos[0], pos[1], pos[2], &ceil) - 100.f;
             if (cHeight < maxHeight) {
