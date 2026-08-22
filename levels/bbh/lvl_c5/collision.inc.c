@@ -1,5 +1,5 @@
-const Collision col_bbh_1_0xe03c6f0[] = {
-COL_INIT(),
+const Collision lvl_c5_collision[] = {
+	COL_INIT(),
 	COL_VERTEX_INIT(1614),
 	COL_VERTEX(456, -1976, -761),
 	COL_VERTEX(1620, -1977, -23),
@@ -4443,7 +4443,5 @@ COL_INIT(),
 	COL_TRI(1610, 1611, 1612),
 	COL_TRI(1610, 1613, 1611),
 	COL_TRI_STOP(),
-COL_WATER_BOX_INIT(1),
-COL_WATER_BOX(51, -8192, -8192, 8192, 8192, -2500),
-COL_END(),
+	COL_END()
 };
