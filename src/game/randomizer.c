@@ -433,67 +433,6 @@ static u8 rando_floors_general(TerrainData type)
     }
 }
 
-static u8 rando_floors_hard(TerrainData type)
-{
-    switch (type)
-    {
-        case SURFACE_NULL:
-        case SURFACE_DEFAULT:                  // Environment default
-        case SURFACE_0004:                     // Unused, has no function and has parameters
-        case SURFACE_VERY_SLIPPERY:            // Very slippery, mostly used for slides
-        case SURFACE_SLIPPERY:                 // Slippery
-        case SURFACE_NOT_SLIPPERY:             // Non-slippery, climbable
-        case SURFACE_HARD:                     // Hard floor (Always has fall damage)
-        case SURFACE_HARD_SLIPPERY:            // Hard and slippery (Always has fall damage)
-        case SURFACE_HARD_VERY_SLIPPERY:       // Hard and very slippery (Always has fall damage)
-        case SURFACE_HARD_NOT_SLIPPERY:        // Hard and Non-slippery (Always has fall damage)
-        case SURFACE_ICE:                      // Slippery Ice, in snow levels and THI's water floor
-        case SURFACE_HORIZONTAL_WIND:          // Horizontal wind, has parameters
-        case SURFACE_FLOWING_WATER:            // Water (flowing), has parameters
-        case SURFACE_MGR_MUSIC:                // Plays the Merry go round music, see handle_merry_go_round_music in bbh_merry_go_round.inc.c for more details
-        case SURFACE_NOISE_DEFAULT:            // Default floor with noise
-        case SURFACE_NOISE_SLIPPERY:           // Slippery floor with noise
-        case SURFACE_NOISE_VERY_SLIPPERY:      // Very slippery floor with noise, used in CCM
-        case SURFACE_NOISE_VERY_SLIPPERY_73:   // Very slippery floor with noise, unused
-        case SURFACE_NOISE_VERY_SLIPPERY_74:   // Very slippery floor with noise, unused
-        case SURFACE_CLOSE_CAMERA:             // Close camera
-        case SURFACE_WATER:                    // Water, has no action, used on some waterboxes below
-        case SURFACE_SHALLOW_QUICKSAND:        // Shallow Quicksand (depth of 10 units)
-        case SURFACE_LOOK_UP_WARP:             // Look up and warp (Wing cap entrance)
-        case SURFACE_TIMER_START:              // Timer start (Peach's secret slide)
-        case SURFACE_TIMER_END:                // Timer stop (Peach's secret slide)
-        case SURFACE_BOSS_FIGHT_CAMERA:        // Wide camera for BOB and WF bosses
-        case SURFACE_CAMERA_FREE_ROAM:         // Free roam camera for THI and TTC
-        case SURFACE_THI3_WALLKICK:            // Surface where there's a wall kick section in THI 3rd area, has no action defined
-        case SURFACE_CAMERA_8_DIR:             // Surface that enables far camera for platforms, used in THI
-        case SURFACE_CAMERA_MIDDLE:            // Surface camera that returns to the middle, used on the 4 pillars of SSL
-        case SURFACE_CAMERA_ROTATE_RIGHT:      // Surface camera that rotates to the right (Bowser 1 & THI)
-        case SURFACE_CAMERA_ROTATE_LEFT:       // Surface camera that rotates to the left (BOB & TTM)
-        case SURFACE_NO_CAM_COLLISION:         // Surface with no cam collision flag
-        case SURFACE_NO_CAM_COLLISION_77:      // Surface with no cam collision flag, unused
-        case SURFACE_NO_CAM_COL_VERY_SLIPPERY: // Surface with no cam collision flag, very slippery with noise (THI)
-        case SURFACE_NO_CAM_COL_SLIPPERY:      // Surface with no cam collision flag, slippery with noise (CCM, PSS and TTM slides)
-        case SURFACE_TTM_VINES:                // TTM vines, has no action defined
-        case SURFACE_SWITCH:                   // Surface with no cam collision flag, non-slippery with noise, used by switches and Dorrie
-        case SURFACE_VANISH_CAP_WALLS:         // Vanish cap walls, pass through them with Vanish Cap
-        case SURFACE_WALL_MISC:                // Used for some walls, Cannon to adjust the camera, and some objects like Warp Pipe
-        case SURFACE_HANGABLE:                 // Ceiling that Mario can climb on
-        case SURFACE_SLOW:                     // Slow down Mario, unused
-
-        case SURFACE_BURNING:                  // Lava / Frostbite (in SL), but is used mostly for Lava
-        case SURFACE_DEEP_QUICKSAND:           // Quicksand (lethal, slow, depth of 160 units)
-        case SURFACE_INSTANT_QUICKSAND:        // Quicksand (lethal, instant)
-        case SURFACE_DEEP_MOVING_QUICKSAND:    // Moving quicksand (flowing, depth of 160 units)
-        case SURFACE_SHALLOW_MOVING_QUICKSAND: // Moving quicksand (flowing, depth of 25 units)
-        case SURFACE_QUICKSAND:                // Moving quicksand (60 units)
-        case SURFACE_MOVING_QUICKSAND:         // Moving quicksand (flowing, depth of 60 units)
-        case SURFACE_INSTANT_MOVING_QUICKSAND: // Quicksand (lethal, flowing)
-            return 1;
-        default:
-            return 0;
-    }
-}
-
 static u8 is_floor_safe(struct Surface *floor, u8 floorSafeLevel,
                         u32 randPosFlags) { // Checks if floor triangle can be spawned on
     s32 slipperiness;
@@ -556,7 +495,7 @@ static u8 is_floor_safe(struct Surface *floor, u8 floorSafeLevel,
     }
 
     if ((Randomizer_gOptionsSettings.gameplay.s.safeSpawns == Randomizer_SPAWN_SAFETY_HARD) && (floorSafeLevel == Randomizer_FLOOR_SAFETY_LOW) && !(randPosFlags & RAND_TYPE_SAFE)) {
-        if (rando_floors_hard(floor->type)) {
+        if (rando_floors_general(floor->type)) {
             return TRUE;
         }
     }

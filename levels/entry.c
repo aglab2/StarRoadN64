@@ -9,7 +9,7 @@
 
 #include "config.h"
 
-// #define TEST_LEVEL LEVEL_HMC
+// #define TEST_LEVEL LEVEL_WDW
 
 extern s32 Randomizer_init_randomizer_test(s32, s32);
 
