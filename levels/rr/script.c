@@ -44,6 +44,8 @@ extern const GeoLayout geo_star_road_sr_roomba[];
 extern const GeoLayout geo_star_road_sr_rotating[];
 extern const GeoLayout geo_star_road_sr_pushing[];
 extern const GeoLayout geo_star_road_sr_squishing[];
+
+extern const BehaviorScript bhvSparkler[];
 /* Fast64 end persistent block [scripts] */
 
 const LevelScript level_rr_entry[] = {
@@ -240,12 +242,17 @@ const LevelScript level_rr_entry[] = {
 		OBJECT_WITH_ACTS(0,3156,-5765,-6841,0,0,0,0x2000000, bhvEyerokBoss,63),
 		OBJECT_WITH_ACTS(118,-2126,-1000,-6033,0,0,0,0x0, bhvHiddenBlueCoin,63),
 		OBJECT_WITH_ACTS(MODEL_RED_COIN_RADAR,0,0,0,0,0,0,5<<24, bhvRedCoinRadar, 31),
+		OBJECT_WITH_ACTS(0,3856,34,-4098,0,0,0,14<<16, bhvFadingWarp, 31),
+		OBJECT_WITH_ACTS(0,-108,-3463,-890,0,0,0,13<<16, bhvFadingWarp, 31),
+		OBJECT_WITH_ACTS(0,-108,-3463,-890,0,0,0,0xb0000, bhvSparkler,31),
+		OBJECT_WITH_ACTS(0,3160,-5873,-7833,0,0,0,13<<16, bhvFadingWarp, 31),
+		OBJECT_WITH_ACTS(0,3160,-5873,-7833,0,0,0,0xb0000, bhvSparkler,31),
 
 		WARP_NODE(10,9,1,10,0),
 		WARP_NODE(11,9,1,12,0),
 		WARP_NODE(12,9,1,11,0),
-		WARP_NODE(13,9,1,14,0),
-		WARP_NODE(14,9,1,13,0),
+		WARP_NODE(13,LEVEL_RR,1,14,0),
+		WARP_NODE(14,LEVEL_RR,1,13,0),
 		WARP_NODE(239,LEVEL_RR,1,239,0),
 		WARP_NODE(240,6,1,9,0),
 		WARP_NODE(241,6,1,11,0),
